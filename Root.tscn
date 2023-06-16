@@ -1,15 +1,11 @@
-[gd_scene load_steps=6 format=3 uid="uid://1hswngw0hyby"]
+[gd_scene load_steps=7 format=3 uid="uid://1hswngw0hyby"]
 
 [ext_resource type="Script" path="res://Root/Root.cs" id="1_h0rbi"]
 [ext_resource type="Script" path="res://Root/LoadingBarrier.cs" id="2_8ct6s"]
 [ext_resource type="Script" path="res://Root/PromptBarrier.cs" id="2_tos5a"]
 [ext_resource type="Script" path="res://Root/LoginPrompt.cs" id="3_uohfb"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_135hl"]
-bg_color = Color(0.160784, 0.160784, 0.160784, 1)
-shadow_color = Color(0, 0, 0, 0.392157)
-shadow_size = 5
-shadow_offset = Vector2(3, 3)
+[ext_resource type="StyleBox" uid="uid://chv58knfro628" path="res://Root/PromptStyle.tres" id="4_r8wlb"]
+[ext_resource type="Script" path="res://Root/ErrorMessagePrompt.cs" id="6_punoj"]
 
 [node name="Root" type="Panel" node_paths=PackedStringArray("ConnectionStatusLabel", "ConnectionActionButton", "LogsList", "LoadingBarrier", "PromptBarrier")]
 anchors_preset = 15
@@ -78,7 +74,7 @@ toggle_mode = true
 text = "Server Logs"
 flat = true
 
-[node name="LoadingBarrier" type="Panel" parent="."]
+[node name="LoadingBarrier" type="Panel" parent="." node_paths=PackedStringArray("LoadingMessage")]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -87,6 +83,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("2_8ct6s")
+LoadingMessage = NodePath("LoadingMessage")
 
 [node name="LoadingMessage" type="Label" parent="LoadingBarrier"]
 layout_mode = 1
@@ -104,7 +101,7 @@ grow_vertical = 2
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="PromptBarrier" type="Panel" parent="."]
+[node name="PromptBarrier" type="Panel" parent="." node_paths=PackedStringArray("Prompts")]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -113,11 +110,11 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("2_tos5a")
-Prompts = Array[Control]([null])
+Prompts = [NodePath("LoginPrompt"), NodePath("ErrorMessagePrompt")]
 
-[node name="LoginPrompt" type="PanelContainer" parent="PromptBarrier" node_paths=PackedStringArray("UsernameInput", "PasswordInput", "PasswordVisibilityButton")]
+[node name="LoginPrompt" type="PanelContainer" parent="PromptBarrier" node_paths=PackedStringArray("UsernameInput", "PasswordInput", "PasswordVisibilityButton", "LoginFailed")]
 visible = false
-custom_minimum_size = Vector2(300, 0)
+custom_minimum_size = Vector2(300, 230)
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -130,11 +127,12 @@ offset_right = 150.0
 offset_bottom = 100.5
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_135hl")
+theme_override_styles/panel = ExtResource("4_r8wlb")
 script = ExtResource("3_uohfb")
 UsernameInput = NodePath("VBoxContainer/MarginContainer/LoginForm/UsernameInput")
 PasswordInput = NodePath("VBoxContainer/MarginContainer/LoginForm/HBoxContainer/PasswordInput")
 PasswordVisibilityButton = NodePath("VBoxContainer/MarginContainer/LoginForm/HBoxContainer/PasswordVisibilityButton")
+LoginFailed = NodePath("VBoxContainer/MarginContainer/LoginForm/LoginFailedLabel")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="PromptBarrier/LoginPrompt"]
 layout_mode = 2
@@ -150,6 +148,7 @@ vertical_alignment = 1
 
 [node name="MarginContainer" type="MarginContainer" parent="PromptBarrier/LoginPrompt/VBoxContainer"]
 layout_mode = 2
+size_flags_vertical = 3
 theme_override_constants/margin_left = 5
 theme_override_constants/margin_top = 5
 theme_override_constants/margin_right = 5
@@ -184,9 +183,68 @@ caret_blink_interval = 0.5
 layout_mode = 2
 toggle_mode = true
 
+[node name="LoginFailedLabel" type="Label" parent="PromptBarrier/LoginPrompt/VBoxContainer/MarginContainer/LoginForm"]
+layout_mode = 2
+size_flags_vertical = 6
+theme_override_colors/font_color = Color(1, 0, 0, 1)
+text = "Failed to log in!"
+
 [node name="SubmitButton" type="Button" parent="PromptBarrier/LoginPrompt/VBoxContainer/MarginContainer/LoginForm"]
 layout_mode = 2
 text = "Submit"
 
+[node name="ErrorMessagePrompt" type="PanelContainer" parent="PromptBarrier" node_paths=PackedStringArray("ErrorMessage")]
+visible = false
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -21.0
+offset_top = -20.0
+offset_right = 21.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = ExtResource("4_r8wlb")
+script = ExtResource("6_punoj")
+ErrorMessage = NodePath("VBoxContainer/MarginContainer/VBoxContainer/ErrorMessage")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PromptBarrier/ErrorMessagePrompt"]
+layout_mode = 2
+
+[node name="Panel" type="PanelContainer" parent="PromptBarrier/ErrorMessagePrompt/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PromptBarrier/ErrorMessagePrompt/VBoxContainer/Panel"]
+layout_mode = 2
+text = "An error occured!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MarginContainer" type="MarginContainer" parent="PromptBarrier/ErrorMessagePrompt/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PromptBarrier/ErrorMessagePrompt/VBoxContainer/MarginContainer"]
+layout_mode = 2
+
+[node name="ErrorMessage" type="Label" parent="PromptBarrier/ErrorMessagePrompt/VBoxContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="CloseButton" type="Button" parent="PromptBarrier/ErrorMessagePrompt/VBoxContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Close"
+
+[connection signal="pressed" from="Home/TopBar/ConnectionActionButton" to="." method="OnConnectionActionButtonPressed"]
+[connection signal="toggled" from="Home/BottomBar/Panel/ServerLogsButton" to="." method="OnServerLogsButtonToggled"]
+[connection signal="LoginCredentialsSubmitted" from="PromptBarrier/LoginPrompt" to="." method="OnLoginCredentialsSubmitted"]
 [connection signal="toggled" from="PromptBarrier/LoginPrompt/VBoxContainer/MarginContainer/LoginForm/HBoxContainer/PasswordVisibilityButton" to="PromptBarrier/LoginPrompt" method="OnPasswordVisibilityButtonToggled"]
+[connection signal="pressed" from="PromptBarrier/LoginPrompt/VBoxContainer/MarginContainer/LoginForm/SubmitButton" to="PromptBarrier" method="HidePrompt"]
 [connection signal="pressed" from="PromptBarrier/LoginPrompt/VBoxContainer/MarginContainer/LoginForm/SubmitButton" to="PromptBarrier/LoginPrompt" method="OnSubmitButtonPressed"]
+[connection signal="pressed" from="PromptBarrier/ErrorMessagePrompt/VBoxContainer/MarginContainer/VBoxContainer/CloseButton" to="PromptBarrier" method="HidePrompt"]

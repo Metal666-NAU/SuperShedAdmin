@@ -21,6 +21,14 @@ public partial class Root : Node {
 	[Export]
 	public virtual PromptBarrier? PromptBarrier { get; set; }
 
+	public virtual void OnLoginCredentialsSubmitted(string username, string password) {
+
+		LoadingBarrier!.ShowBarrier("Logging in...");
+
+		Client.Authenticate(username, password);
+
+	}
+
 	public virtual void OnServerLogsButtonToggled(bool pressed) {
 
 		LogsList!.Visible = pressed;
@@ -56,15 +64,49 @@ public partial class Root : Node {
 
 		UpdateConnectionStatus(ConnectionStatus.Disconnected);
 
-		Client.ConnectionStatusChanged += UpdateConnectionStatus;
+		Client.NetworkError += message => PromptBarrier!.ShowPrompt<ErrorMessagePrompt>().SetMessage(message);
 
-		if(Settings.Instance.AuthToken == null) {
+		Client.ConnectionStatusChanged += connectionStatus => {
 
-			PromptBarrier!.ShowPrompt(PromptBarrier.Prompt.Login);
+			UpdateConnectionStatus(connectionStatus);
 
-			return;
+			switch(connectionStatus) {
 
-		}
+				case ConnectionStatus.Connected: {
+
+					if(Settings.Instance.AuthToken != null) {
+
+						Client.Authenticate(Settings.Instance.AuthToken);
+
+					}
+
+					else {
+
+						PromptBarrier!.ShowPrompt<LoginPrompt>();
+
+					}
+
+					break;
+
+				}
+
+			}
+
+		};
+
+		Client.AuthResponseReceived += authResponse => {
+
+			LoadingBarrier!.HideBarrier();
+
+			if(authResponse.Success == true) {
+
+				return;
+
+			}
+
+			PromptBarrier!.ShowPrompt<LoginPrompt>().SetFailed();
+
+		};
 
 		Client.StartClient();
 

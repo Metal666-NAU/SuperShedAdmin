@@ -1,6 +1,7 @@
 ﻿using Godot;
 
 using System;
+using System.Net.WebSockets;
 using System.Text.Json;
 
 using Websocket.Client;
@@ -23,17 +24,21 @@ public static class Client {
 
 	public static event Action<ConnectionStatus>? ConnectionStatusChanged;
 
+	public static event Action<AuthResponse>? AuthResponseReceived;
+
+	public static event Action<string>? NetworkError;
+
 	public static void StartClient() {
 
 		if(WebsocketClient != null) {
 
-			GD.PushError("Failed to start Client: Client is already running");
+			PublishNetworkError("Failed to start Client: Client is already running");
 
 			return;
 
 		}
 
-		WebsocketClient = new(new Uri("ws://localhost:8181"));
+		WebsocketClient = new(new Uri("ws://localhost:8181/admin"));
 
 		SetConnectionStatus(ConnectionStatus.Connecting);
 
@@ -59,15 +64,29 @@ public static class Client {
 
 			SetConnectionStatus(ConnectionStatus.Connected);
 
-			Authenticate();
-
 		});
 
 		WebsocketClient.MessageReceived.Subscribe(responseMessage => {
 
 			switch(responseMessage.MessageType) {
 
+				case WebSocketMessageType.Text: {
 
+					AuthResponse? authResponse = JsonSerializer.Deserialize<AuthResponse>(responseMessage.Text, JSON_SERIALIZER_OPTIONS);
+
+					if(authResponse == null) {
+
+						PublishNetworkError($"Failed to deserialize Auth Response: {responseMessage.Text}");
+
+						break;
+
+					}
+
+					RunOnMainThread(() => AuthResponseReceived?.Invoke(authResponse));
+
+					break;
+
+				}
 
 			}
 
@@ -77,27 +96,41 @@ public static class Client {
 
 	}
 
-	public static void Authenticate() {
+	public static void Authenticate(string username, string password) =>
+		Authenticate(new AuthRequest() {
 
-		WebsocketClient!.Send(JsonSerializer.Serialize(new AuthRequest() {
+			Username = username,
+			Password = password
 
-			// TODO:
+		});
 
-		}, JSON_SERIALIZER_OPTIONS));
+	public static void Authenticate(string authToken) =>
+		Authenticate(new AuthRequest() {
 
-	}
+			AuthToken = authToken
 
-	public static void SetConnectionStatus(ConnectionStatus connectionStatus) {
+		});
+
+	private static void Authenticate(AuthRequest authRequest) =>
+		WebsocketClient!.Send(JsonSerializer.Serialize(authRequest, JSON_SERIALIZER_OPTIONS));
+
+	private static void SetConnectionStatus(ConnectionStatus connectionStatus) {
 
 		ConnectionStatus = connectionStatus;
 
-		ConnectionStatusChanged?.Invoke(ConnectionStatus);
+		RunOnMainThread(() => ConnectionStatusChanged?.Invoke(ConnectionStatus));
 
 	}
 
+	private static void PublishNetworkError(string message) =>
+		RunOnMainThread(() => NetworkError?.Invoke(message));
+
+	private static void RunOnMainThread(Action action) =>
+		Dispatcher.SynchronizationContext.Send(_ => action(), null);
+
 	public static void DisconnectClient() {
 
-		WebsocketClient!.Stop(System.Net.WebSockets.WebSocketCloseStatus.NormalClosure, null);
+		WebsocketClient!.Stop(WebSocketCloseStatus.NormalClosure, null);
 
 		WebsocketClient!.Dispose();
 

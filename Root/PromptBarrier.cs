@@ -1,30 +1,37 @@
 using Godot;
 using Godot.Collections;
 
+using System.Linq;
+
 namespace SuperShedAdmin.Root;
 
 public partial class PromptBarrier : Panel {
 
 	[Export]
-	public virtual Array<Control>? Prompts { get; set; }
+	public virtual Array<PanelContainer>? Prompts { get; set; }
 
-	public override void _Ready() { }
+	public virtual TPrompt ShowPrompt<TPrompt>()
+		where TPrompt : PanelContainer {
 
-	public virtual void ShowPrompt(Prompt prompt) {
+		TPrompt prompt = Prompts!.OfType<TPrompt>().Single();
 
-		foreach(Control promptControl in Prompts!) {
+		prompt.Show();
+
+		Show();
+
+		return prompt;
+
+	}
+
+	public virtual void HidePrompt() {
+
+		Hide();
+
+		foreach(PanelContainer promptControl in Prompts!) {
 
 			promptControl.Hide();
 
 		}
-
-		Prompts[(int) prompt].Show();
-
-	}
-
-	public enum Prompt {
-
-		Login
 
 	}
 
