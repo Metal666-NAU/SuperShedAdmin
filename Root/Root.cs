@@ -1,60 +1,124 @@
 using Godot;
 
+using SuperShedAdmin.Networking;
+
 namespace SuperShedAdmin.Root;
 
 public partial class Root : Node {
 
-	public const string NODE_PATH = "/root/Root";
+	[Export]
+	public virtual Label? ConnectionStatusLabel { get; set; }
 
 	[Export]
-	public virtual PackedScene? LoginScene { get; set; }
+	public virtual Button? ConnectionActionButton { get; set; }
 
 	[Export]
-	public virtual PackedScene? HomeScene { get; set; }
+	public virtual ItemList? LogsList { get; set; }
 
 	[Export]
-	public virtual Control? PageMountPoint { get; set; }
+	public virtual LoadingBarrier? LoadingBarrier { get; set; }
 
 	[Export]
-	public virtual Panel? LoadingBarrier { get; set; }
+	public virtual PromptBarrier? PromptBarrier { get; set; }
 
-	[Export]
-	public virtual Label? LoadingMessage { get; set; }
+	public virtual void OnServerLogsButtonToggled(bool pressed) {
 
-	public virtual Node? CurrentPage { get; set; }
+		LogsList!.Visible = pressed;
+
+	}
+
+	public virtual void OnConnectionActionButtonPressed() {
+
+		switch(Client.ConnectionStatus) {
+
+			case ConnectionStatus.Connected:
+			case ConnectionStatus.Connecting: {
+
+				Client.DisconnectClient();
+
+				break;
+
+			}
+
+			case ConnectionStatus.Disconnected: {
+
+				Client.StartClient();
+
+				break;
+
+			}
+
+		}
+
+	}
 
 	public override void _Ready() {
 
-		SwitchPage(Settings.Instance.AuthToken == null ? LoginScene! : HomeScene!);
+		UpdateConnectionStatus(ConnectionStatus.Disconnected);
+
+		Client.ConnectionStatusChanged += UpdateConnectionStatus;
+
+		if(Settings.Instance.AuthToken == null) {
+
+			PromptBarrier!.ShowPrompt(PromptBarrier.Prompt.Login);
+
+			return;
+
+		}
+
+		Client.StartClient();
 
 	}
 
-	public virtual void GoToLoginPage() => SwitchPage(LoginScene!);
-	public virtual void GoToHomePage() => SwitchPage(HomeScene!);
+	public virtual void UpdateConnectionStatus(ConnectionStatus connectionStatus) {
 
-	protected virtual void SwitchPage(PackedScene scene) {
+		ConnectionStatusLabel!.Text = $"Connection status: {connectionStatus}";
 
-		CurrentPage?.QueueFree();
+		Color fontColor = new();
 
-		CurrentPage = scene.Instantiate();
+		switch(connectionStatus) {
 
-		PageMountPoint!.AddChild(CurrentPage);
+			case ConnectionStatus.Connected: {
+
+				fontColor = Colors.Green;
+
+				ConnectionActionButton!.Text = "Disconnect?";
+
+				break;
+
+			}
+
+			case ConnectionStatus.Disconnected: {
+
+				fontColor = Colors.Red;
+
+				ConnectionActionButton!.Text = "Connect?";
+
+				break;
+
+			}
+
+			case ConnectionStatus.Connecting: {
+
+				fontColor = Colors.Yellow;
+
+				ConnectionActionButton!.Text = "Cancel?";
+
+				break;
+
+			}
+
+		}
+
+		ConnectionStatusLabel.AddThemeColorOverride("font_color", fontColor);
 
 	}
 
-	public virtual void StartLoading(string message) {
+	protected override void Dispose(bool disposing) {
 
-		LoadingMessage!.Text = message;
+		base.Dispose(disposing);
 
-		LoadingBarrier!.Show();
-
-	}
-
-	public virtual void FinishLoading() {
-
-		LoadingBarrier!.Hide();
-
-		LoadingMessage!.Text = null;
+		Client.DisconnectClient();
 
 	}
 
