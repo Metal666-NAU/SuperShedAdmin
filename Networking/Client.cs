@@ -1,7 +1,10 @@
 ﻿using Godot;
 
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Net.WebSockets;
+using System.Reactive.Linq;
 using System.Text.Json;
 
 using Websocket.Client;
@@ -19,6 +22,8 @@ public static class Client {
 	public static WebsocketClient? WebsocketClient { get; set; }
 
 	public static DisconnectionInfo? DisconnectionInfo { get; set; }
+
+	public static Dictionary<IncomingMessage, List<Action<BinaryReader>>> Listeners { get; set; } = new();
 
 	public static ConnectionStatus ConnectionStatus { get; set; }
 
@@ -88,6 +93,22 @@ public static class Client {
 
 				}
 
+				case WebSocketMessageType.Binary: {
+
+					using MemoryStream memoryStream = new(responseMessage.Binary);
+
+					using BinaryReader binaryReader = new(memoryStream);
+
+					IncomingMessage command = (IncomingMessage) binaryReader.ReadByte();
+
+					Listeners.GetValueOrDefault(command)?
+								.ForEach(listener =>
+											RunOnMainThread(() => listener.Invoke(binaryReader)));
+
+					break;
+
+				}
+
 			}
 
 		});
@@ -110,6 +131,18 @@ public static class Client {
 			AuthToken = authToken
 
 		});
+
+	public static void Listen(IncomingMessage incomingMessage, Action<BinaryReader> listener) {
+
+		if(!Listeners.ContainsKey(incomingMessage)) {
+
+			Listeners[incomingMessage] = new();
+
+		}
+
+		Listeners[incomingMessage].Add(listener);
+
+	}
 
 	private static void Authenticate(AuthRequest authRequest) =>
 		WebsocketClient!.Send(JsonSerializer.Serialize(authRequest, JSON_SERIALIZER_OPTIONS));
@@ -135,6 +168,12 @@ public static class Client {
 		WebsocketClient!.Dispose();
 
 		WebsocketClient = null;
+
+	}
+
+	public enum IncomingMessage {
+
+		Log
 
 	}
 

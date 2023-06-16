@@ -90,6 +90,15 @@ public partial class Root : Node {
 
 				}
 
+				case ConnectionStatus.Connecting:
+				case ConnectionStatus.Disconnected: {
+
+					LogsList!.Clear();
+
+					break;
+
+				}
+
 			}
 
 		};
@@ -100,6 +109,8 @@ public partial class Root : Node {
 
 			if(authResponse.Success == true) {
 
+				Settings.Instance.AuthToken = authResponse.AuthToken;
+
 				return;
 
 			}
@@ -107,6 +118,48 @@ public partial class Root : Node {
 			PromptBarrier!.ShowPrompt<LoginPrompt>().SetFailed();
 
 		};
+
+		Client.Listen(Client.IncomingMessage.Log, data => {
+
+			string message = data.ReadString();
+
+			Color color = new();
+
+			switch(data.ReadByte()) {
+
+				case 0: {
+
+					color = Colors.White;
+
+					break;
+
+				}
+
+				case 1: {
+
+					color = Colors.Green;
+
+					break;
+
+				}
+
+				case 2: {
+
+					color = Colors.Red;
+
+					break;
+
+				}
+
+			}
+
+			LogsList!.SetItemCustomFgColor(LogsList.AddItem(message), color);
+
+			VScrollBar scrollBar = LogsList.GetVScrollBar();
+
+			scrollBar.Value = scrollBar.MaxValue;
+
+		});
 
 		Client.StartClient();
 

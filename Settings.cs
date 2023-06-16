@@ -3,22 +3,25 @@
 using System;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace SuperShedAdmin;
 
 public class Settings {
 
-	public static Settings Instance { get; set; } = new(true);
+	public static Settings Instance { get; set; } = Load();
 
 	public static string Path => ProjectSettings.GlobalizePath("user://settings.json");
 
 	public static JsonSerializerOptions JsonSerializerOptions { get; set; } = new() {
 
-		WriteIndented = true
+		WriteIndented = true,
+		IncludeFields = true
 
 	};
 
-	private string? authToken;
+	public string? authToken;
+	[JsonIgnore]
 	public virtual string? AuthToken {
 
 		get => authToken;
@@ -30,18 +33,6 @@ public class Settings {
 			Save();
 
 		}
-
-	}
-
-	public Settings(bool load = false) {
-
-		if(!load) {
-
-			return;
-
-		}
-
-		Load();
 
 	}
 
@@ -76,7 +67,7 @@ public class Settings {
 
 		try {
 
-			Directory.CreateDirectory(Path);
+			Directory.CreateDirectory(System.IO.Path.GetDirectoryName(Path)!);
 
 			File.WriteAllText(Path,
 								JsonSerializer.Serialize(Instance,
