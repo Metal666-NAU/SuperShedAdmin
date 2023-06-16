@@ -1,0 +1,60 @@
+[gd_scene load_steps=2 format=3 uid="uid://cji5xpifc7k2w"]
+
+[ext_resource type="Script" path="res://Root/Login/Login.cs" id="1_f4tmt"]
+
+[node name="Login" type="Control" node_paths=PackedStringArray("UsernameInput", "PasswordInput", "PasswordVisibilityButton")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 1
+script = ExtResource("1_f4tmt")
+UsernameInput = NodePath("LoginForm/UsernameInput")
+PasswordInput = NodePath("LoginForm/HBoxContainer/PasswordInput")
+PasswordVisibilityButton = NodePath("LoginForm/HBoxContainer/PasswordVisibilityButton")
+
+[node name="LoginForm" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.4
+anchor_top = 0.5
+anchor_right = 0.6
+anchor_bottom = 0.5
+offset_left = -33.5
+offset_top = -60.0
+offset_right = 33.5
+offset_bottom = 60.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="UsernameLabel" type="Label" parent="LoginForm"]
+layout_mode = 2
+text = "Username"
+
+[node name="UsernameInput" type="LineEdit" parent="LoginForm"]
+layout_mode = 2
+
+[node name="PasswordLabel" type="Label" parent="LoginForm"]
+layout_mode = 2
+text = "Password"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="LoginForm"]
+layout_mode = 2
+
+[node name="PasswordInput" type="LineEdit" parent="LoginForm/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PasswordVisibilityButton" type="Button" parent="LoginForm/HBoxContainer"]
+layout_mode = 2
+toggle_mode = true
+
+[node name="SubmitButton" type="Button" parent="LoginForm"]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Submit"
+
+[connection signal="toggled" from="LoginForm/HBoxContainer/PasswordVisibilityButton" to="." method="OnPasswordVisibilityButtonToggled"]
+[connection signal="pressed" from="LoginForm/SubmitButton" to="." method="OnSubmitButtonPressed"]
