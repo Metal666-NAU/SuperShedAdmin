@@ -173,7 +173,9 @@ public static class Client {
 
 	public enum IncomingMessage {
 
-		Log
+		Log,
+		Worker,
+		WorkerStatus
 
 	}
 

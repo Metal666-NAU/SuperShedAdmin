@@ -2,6 +2,9 @@ using Godot;
 
 using SuperShedAdmin.Networking;
 
+using System.Collections.Generic;
+using System.Linq;
+
 namespace SuperShedAdmin.Root;
 
 public partial class Root : Node {
@@ -13,6 +16,21 @@ public partial class Root : Node {
 	public virtual Button? ConnectionActionButton { get; set; }
 
 	[Export]
+	public virtual Button? ShowWorkersButton { get; set; }
+
+	[Export]
+	public virtual Panel? WorkersPanel { get; set; }
+
+	[Export]
+	public virtual ItemList? OnlineWorkersList { get; set; }
+
+	[Export]
+	public virtual ItemList? OfflineWorkersList { get; set; }
+
+	[Export]
+	public virtual Label? WorkerStats { get; set; }
+
+	[Export]
 	public virtual ItemList? LogsList { get; set; }
 
 	[Export]
@@ -21,17 +39,13 @@ public partial class Root : Node {
 	[Export]
 	public virtual PromptBarrier? PromptBarrier { get; set; }
 
+	public virtual List<Worker> Workers { get; set; } = new();
+
 	public virtual void OnLoginCredentialsSubmitted(string username, string password) {
 
 		LoadingBarrier!.ShowBarrier("Logging in...");
 
 		Client.Authenticate(username, password);
-
-	}
-
-	public virtual void OnServerLogsButtonToggled(bool pressed) {
-
-		LogsList!.Visible = pressed;
 
 	}
 
@@ -57,6 +71,20 @@ public partial class Root : Node {
 			}
 
 		}
+
+	}
+
+	public virtual void OnWorkersPanelToggled(bool open) {
+
+		WorkersPanel!.Visible = open;
+
+		ShowWorkersButton!.Visible = !open;
+
+	}
+
+	public virtual void OnServerLogsButtonToggled(bool pressed) {
+
+		LogsList!.Visible = pressed;
 
 	}
 
@@ -94,6 +122,9 @@ public partial class Root : Node {
 				case ConnectionStatus.Disconnected: {
 
 					LogsList!.Clear();
+					Workers!.Clear();
+
+					UpdateWorkerLists();
 
 					break;
 
@@ -161,6 +192,38 @@ public partial class Root : Node {
 
 		});
 
+		Client.Listen(Client.IncomingMessage.Worker, data => {
+
+			string workerId = data.ReadString();
+			string workerName = data.ReadString();
+
+			Workers.Add(new(workerId, workerName, false));
+
+			UpdateWorkerLists();
+
+		});
+
+		Client.Listen(Client.IncomingMessage.WorkerStatus, data => {
+
+			string workerId = data.ReadString();
+			bool isOnline = data.ReadBoolean();
+
+			int index = Workers.FindIndex(worker => worker.Id.Equals(workerId));
+
+			if(index == -1) {
+
+				GD.PushError("Failed to update Worker Status: Worker is not in the Workers list.");
+
+				return;
+
+			}
+
+			Workers[index] = Workers[index] with { IsOnline = isOnline };
+
+			UpdateWorkerLists();
+
+		});
+
 		Client.StartClient();
 
 	}
@@ -209,6 +272,22 @@ public partial class Root : Node {
 
 	}
 
+	public virtual void UpdateWorkerLists() {
+
+		OnlineWorkersList!.Clear();
+		OfflineWorkersList!.Clear();
+
+		foreach(Worker worker in Workers) {
+
+			ItemList itemList = worker.IsOnline ? OnlineWorkersList : OfflineWorkersList;
+
+			itemList.SetItemMetadata(itemList.AddItem(worker.Name), worker.Id);
+		}
+
+		WorkerStats!.Text = $"Workers: {Workers.Count}, Online: {Workers.Count(worker => worker.IsOnline)}";
+
+	}
+
 	protected override void Dispose(bool disposing) {
 
 		base.Dispose(disposing);
@@ -216,5 +295,7 @@ public partial class Root : Node {
 		Client.DisconnectClient();
 
 	}
+
+	public record Worker(string Id, string Name, bool IsOnline);
 
 }

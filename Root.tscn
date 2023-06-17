@@ -1,22 +1,29 @@
-[gd_scene load_steps=7 format=3 uid="uid://1hswngw0hyby"]
+[gd_scene load_steps=8 format=3 uid="uid://1hswngw0hyby"]
 
 [ext_resource type="Script" path="res://Root/Root.cs" id="1_h0rbi"]
 [ext_resource type="Script" path="res://Root/LoadingBarrier.cs" id="2_8ct6s"]
+[ext_resource type="LabelSettings" uid="uid://l0l2jpoyadan" path="res://Root/ListHeader.tres" id="2_nwanh"]
 [ext_resource type="Script" path="res://Root/PromptBarrier.cs" id="2_tos5a"]
 [ext_resource type="Script" path="res://Root/LoginPrompt.cs" id="3_uohfb"]
 [ext_resource type="StyleBox" uid="uid://chv58knfro628" path="res://Root/PromptStyle.tres" id="4_r8wlb"]
 [ext_resource type="Script" path="res://Root/ErrorMessagePrompt.cs" id="6_punoj"]
 
-[node name="Root" type="Panel" node_paths=PackedStringArray("ConnectionStatusLabel", "ConnectionActionButton", "LogsList", "LoadingBarrier", "PromptBarrier")]
+[node name="Root" type="Panel" node_paths=PackedStringArray("ConnectionStatusLabel", "ConnectionActionButton", "ShowWorkersButton", "WorkersPanel", "OnlineWorkersList", "OfflineWorkersList", "WorkerStats", "LogsList", "LoadingBarrier", "PromptBarrier")]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+focus_mode = 1
 script = ExtResource("1_h0rbi")
 ConnectionStatusLabel = NodePath("Home/TopBar/ConnectionStatusLabel")
 ConnectionActionButton = NodePath("Home/TopBar/ConnectionActionButton")
-LogsList = NodePath("Home/ContentPanel/LogsList")
+ShowWorkersButton = NodePath("Home/ContentPanel/ShowWorkersButton")
+WorkersPanel = NodePath("Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel")
+OnlineWorkersList = NodePath("Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer/OnlineWorkersList")
+OfflineWorkersList = NodePath("Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer/OfflineWorkersList")
+WorkerStats = NodePath("Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer/WorkerStats")
+LogsList = NodePath("Home/ContentPanel/VSplitContainer/LogsList")
 LoadingBarrier = NodePath("LoadingBarrier")
 PromptBarrier = NodePath("PromptBarrier")
 
@@ -38,19 +45,92 @@ layout_mode = 2
 [node name="ConnectionActionButton" type="Button" parent="Home/TopBar"]
 layout_mode = 2
 
-[node name="ContentPanel" type="VSplitContainer" parent="Home"]
+[node name="Separator" type="Control" parent="Home/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 1
+
+[node name="ContentPanel" type="Control" parent="Home"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="Panel" type="Panel" parent="Home/ContentPanel"]
+[node name="VSplitContainer" type="VSplitContainer" parent="Home/ContentPanel"]
+layout_mode = 2
+offset_top = 4.0
+offset_right = 1152.0
+offset_bottom = 560.0
+
+[node name="HSplitContainer" type="HSplitContainer" parent="Home/ContentPanel/VSplitContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="LogsList" type="ItemList" parent="Home/ContentPanel"]
+[node name="Panel" type="Panel" parent="Home/ContentPanel/VSplitContainer/HSplitContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 1
+
+[node name="WorkersPanel" type="Panel" parent="Home/ContentPanel/VSplitContainer/HSplitContainer"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HideWorkersButton" type="Button" parent="Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer"]
+layout_mode = 2
+text = "Workers >"
+flat = true
+
+[node name="Label" type="Label" parent="Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer"]
+layout_mode = 2
+text = "Online"
+label_settings = ExtResource("2_nwanh")
+horizontal_alignment = 1
+vertical_alignment = 1
+uppercase = true
+
+[node name="OnlineWorkersList" type="ItemList" parent="Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Label2" type="Label" parent="Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer"]
+layout_mode = 2
+text = "Offline"
+label_settings = ExtResource("2_nwanh")
+horizontal_alignment = 1
+vertical_alignment = 1
+uppercase = true
+
+[node name="OfflineWorkersList" type="ItemList" parent="Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="WorkerStats" type="Label" parent="Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer"]
+layout_mode = 2
+
+[node name="LogsList" type="ItemList" parent="Home/ContentPanel/VSplitContainer"]
 visible = false
 custom_minimum_size = Vector2(0, 150)
 layout_mode = 2
+
+[node name="ShowWorkersButton" type="Button" parent="Home/ContentPanel"]
+visible = false
+custom_minimum_size = Vector2(90, 35)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 1.0
+anchor_right = 1.0
+grow_horizontal = 0
+grow_vertical = 0
+rotation = -1.5708
+pivot_offset = Vector2(95, 40)
+text = "Workers ^"
 
 [node name="BottomBar" type="HBoxContainer" parent="Home"]
 custom_minimum_size = Vector2(0, 40)
@@ -59,6 +139,7 @@ layout_mode = 2
 [node name="Panel" type="Panel" parent="Home/BottomBar"]
 layout_mode = 2
 size_flags_horizontal = 3
+focus_mode = 1
 
 [node name="ServerLogsButton" type="Button" parent="Home/BottomBar/Panel"]
 layout_mode = 1
@@ -242,6 +323,8 @@ layout_mode = 2
 text = "Close"
 
 [connection signal="pressed" from="Home/TopBar/ConnectionActionButton" to="." method="OnConnectionActionButtonPressed"]
+[connection signal="pressed" from="Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer/HideWorkersButton" to="." method="OnWorkersPanelToggled" binds= [false]]
+[connection signal="pressed" from="Home/ContentPanel/ShowWorkersButton" to="." method="OnWorkersPanelToggled" binds= [true]]
 [connection signal="toggled" from="Home/BottomBar/Panel/ServerLogsButton" to="." method="OnServerLogsButtonToggled"]
 [connection signal="LoginCredentialsSubmitted" from="PromptBarrier/LoginPrompt" to="." method="OnLoginCredentialsSubmitted"]
 [connection signal="toggled" from="PromptBarrier/LoginPrompt/VBoxContainer/MarginContainer/LoginForm/HBoxContainer/PasswordVisibilityButton" to="PromptBarrier/LoginPrompt" method="OnPasswordVisibilityButtonToggled"]
