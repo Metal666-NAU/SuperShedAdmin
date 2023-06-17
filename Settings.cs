@@ -20,6 +20,7 @@ public class Settings {
 
 	};
 
+	[JsonInclude]
 	public string? authToken;
 	[JsonIgnore]
 	public virtual string? AuthToken {
@@ -48,8 +49,8 @@ public class Settings {
 
 			}
 
-			return Instance = JsonSerializer.Deserialize<Settings>(File.ReadAllText(Path),
-																	JsonSerializerOptions)!;
+			settings = JsonSerializer.Deserialize<Settings>(File.ReadAllText(Path),
+															JsonSerializerOptions)!;
 
 		}
 
