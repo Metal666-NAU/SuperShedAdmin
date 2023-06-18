@@ -13,7 +13,7 @@ public partial class PromptBarrier : Panel {
 	public virtual TPrompt ShowPrompt<TPrompt>()
 		where TPrompt : PanelContainer {
 
-		TPrompt prompt = Prompts!.OfType<TPrompt>().Single();
+		TPrompt prompt = GetPrompt<TPrompt>();
 
 		prompt.Show();
 
@@ -22,6 +22,9 @@ public partial class PromptBarrier : Panel {
 		return prompt;
 
 	}
+
+	public virtual TPrompt GetPrompt<TPrompt>()
+		where TPrompt : PanelContainer => Prompts!.OfType<TPrompt>().Single();
 
 	public virtual void HidePrompt() {
 

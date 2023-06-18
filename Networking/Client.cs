@@ -117,6 +117,18 @@ public static class Client {
 
 	}
 
+	public static void Listen(IncomingMessage incomingMessage, Action<BinaryReader> listener) {
+
+		if(!Listeners.ContainsKey(incomingMessage)) {
+
+			Listeners[incomingMessage] = new();
+
+		}
+
+		Listeners[incomingMessage].Add(listener);
+
+	}
+
 	public static void Authenticate(string username, string password) =>
 		Authenticate(new AuthRequest() {
 
@@ -132,20 +144,32 @@ public static class Client {
 
 		});
 
-	public static void Listen(IncomingMessage incomingMessage, Action<BinaryReader> listener) {
+	private static void Authenticate(AuthRequest authRequest) =>
+		WebsocketClient!.Send(JsonSerializer.Serialize(authRequest, JSON_SERIALIZER_OPTIONS));
 
-		if(!Listeners.ContainsKey(incomingMessage)) {
+	public static void SendStartWorkerAuth(string workerId) =>
+		Send((byte) OutgoingMessage.StartWorkerAuth, workerId);
 
-			Listeners[incomingMessage] = new();
+	public static void SendCancelWorkerAuth() =>
+		Send((byte) OutgoingMessage.CancelWorkerAuth);
+
+	private static void Send(byte command, params object[] data) {
+
+		using MemoryStream memoryStream = new();
+
+		using BinaryWriter binaryWriter = new(memoryStream);
+
+		binaryWriter.Write(command);
+
+		foreach(dynamic element in data) {
+
+			binaryWriter.Write(element);
 
 		}
 
-		Listeners[incomingMessage].Add(listener);
+		WebsocketClient!.Send(memoryStream.ToArray());
 
 	}
-
-	private static void Authenticate(AuthRequest authRequest) =>
-		WebsocketClient!.Send(JsonSerializer.Serialize(authRequest, JSON_SERIALIZER_OPTIONS));
 
 	private static void SetConnectionStatus(ConnectionStatus connectionStatus) {
 
@@ -175,7 +199,16 @@ public static class Client {
 
 		Log,
 		Worker,
-		WorkerStatus
+		WorkerStatus,
+		WorkerLoginCode,
+		WorkerAuthSuccess
+
+	}
+
+	public enum OutgoingMessage {
+
+		StartWorkerAuth,
+		CancelWorkerAuth
 
 	}
 

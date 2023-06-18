@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://1hswngw0hyby"]
+[gd_scene load_steps=9 format=3 uid="uid://1hswngw0hyby"]
 
 [ext_resource type="Script" path="res://Root/Root.cs" id="1_h0rbi"]
 [ext_resource type="Script" path="res://Root/LoadingBarrier.cs" id="2_8ct6s"]
@@ -7,8 +7,9 @@
 [ext_resource type="Script" path="res://Root/LoginPrompt.cs" id="3_uohfb"]
 [ext_resource type="StyleBox" uid="uid://chv58knfro628" path="res://Root/PromptStyle.tres" id="4_r8wlb"]
 [ext_resource type="Script" path="res://Root/ErrorMessagePrompt.cs" id="6_punoj"]
+[ext_resource type="Script" path="res://Root/WorkerLoginPrompt.cs" id="8_rxv05"]
 
-[node name="Root" type="Panel" node_paths=PackedStringArray("ConnectionStatusLabel", "ConnectionActionButton", "ShowWorkersButton", "WorkersPanel", "OnlineWorkersList", "OfflineWorkersList", "WorkerStats", "LogsList", "LoadingBarrier", "PromptBarrier")]
+[node name="Root" type="Panel" node_paths=PackedStringArray("ConnectionStatusLabel", "ConnectionActionButton", "ShowWorkersButton", "WorkersPanel", "OnlineWorkersList", "OnlineWorkerPopupMenu", "OfflineWorkersList", "OfflineWorkerPopupMenu", "WorkerStats", "LogsList", "LoadingBarrier", "PromptBarrier")]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -21,7 +22,9 @@ ConnectionActionButton = NodePath("Home/TopBar/ConnectionActionButton")
 ShowWorkersButton = NodePath("Home/ContentPanel/ShowWorkersButton")
 WorkersPanel = NodePath("Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel")
 OnlineWorkersList = NodePath("Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer/OnlineWorkersList")
+OnlineWorkerPopupMenu = NodePath("Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer/OnlineWorkersList/OnlineWorkerPopupMenu")
 OfflineWorkersList = NodePath("Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer/OfflineWorkersList")
+OfflineWorkerPopupMenu = NodePath("Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer/OfflineWorkersList/OfflineWorkerPopupMenu")
 WorkerStats = NodePath("Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer/WorkerStats")
 LogsList = NodePath("Home/ContentPanel/VSplitContainer/LogsList")
 LoadingBarrier = NodePath("LoadingBarrier")
@@ -99,6 +102,11 @@ uppercase = true
 layout_mode = 2
 size_flags_vertical = 3
 
+[node name="OnlineWorkerPopupMenu" type="PopupMenu" parent="Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer/OnlineWorkersList"]
+item_count = 1
+item_0/text = "Log Out"
+item_0/id = 0
+
 [node name="Label2" type="Label" parent="Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer"]
 layout_mode = 2
 text = "Offline"
@@ -110,6 +118,11 @@ uppercase = true
 [node name="OfflineWorkersList" type="ItemList" parent="Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
+
+[node name="OfflineWorkerPopupMenu" type="PopupMenu" parent="Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer/OfflineWorkersList"]
+item_count = 1
+item_0/text = "Get Login Code"
+item_0/id = 0
 
 [node name="WorkerStats" type="Label" parent="Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer"]
 layout_mode = 2
@@ -191,7 +204,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("2_tos5a")
-Prompts = [NodePath("LoginPrompt"), NodePath("ErrorMessagePrompt")]
+Prompts = [NodePath("LoginPrompt"), NodePath("ErrorMessagePrompt"), NodePath("WorkerLoginPrompt")]
 
 [node name="LoginPrompt" type="PanelContainer" parent="PromptBarrier" node_paths=PackedStringArray("UsernameInput", "PasswordInput", "PasswordVisibilityButton", "LoginFailed")]
 visible = false
@@ -322,8 +335,59 @@ layout_mode = 2
 layout_mode = 2
 text = "Close"
 
+[node name="WorkerLoginPrompt" type="PanelContainer" parent="PromptBarrier" node_paths=PackedStringArray("LoginCode")]
+visible = false
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -49.0
+offset_right = 150.0
+offset_bottom = 49.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = ExtResource("4_r8wlb")
+script = ExtResource("8_rxv05")
+LoginCode = NodePath("VBoxContainer/MarginContainer/VBoxContainer/LoginCode")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PromptBarrier/WorkerLoginPrompt"]
+layout_mode = 2
+
+[node name="Panel" type="PanelContainer" parent="PromptBarrier/WorkerLoginPrompt/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PromptBarrier/WorkerLoginPrompt/VBoxContainer/Panel"]
+layout_mode = 2
+text = "Worker Login Code"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MarginContainer" type="MarginContainer" parent="PromptBarrier/WorkerLoginPrompt/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PromptBarrier/WorkerLoginPrompt/VBoxContainer/MarginContainer"]
+layout_mode = 2
+
+[node name="LoginCode" type="Label" parent="PromptBarrier/WorkerLoginPrompt/VBoxContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="CancelButton" type="Button" parent="PromptBarrier/WorkerLoginPrompt/VBoxContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Cancel"
+
 [connection signal="pressed" from="Home/TopBar/ConnectionActionButton" to="." method="OnConnectionActionButtonPressed"]
 [connection signal="pressed" from="Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer/HideWorkersButton" to="." method="OnWorkersPanelToggled" binds= [false]]
+[connection signal="item_clicked" from="Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer/OnlineWorkersList" to="." method="OnOnlineWorkerClicked"]
+[connection signal="item_clicked" from="Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer/OfflineWorkersList" to="." method="OnOfflineWorkerClicked"]
+[connection signal="index_pressed" from="Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer/OfflineWorkersList/OfflineWorkerPopupMenu" to="." method="OnOfflineWorkerActionPressed"]
 [connection signal="pressed" from="Home/ContentPanel/ShowWorkersButton" to="." method="OnWorkersPanelToggled" binds= [true]]
 [connection signal="toggled" from="Home/BottomBar/Panel/ServerLogsButton" to="." method="OnServerLogsButtonToggled"]
 [connection signal="LoginCredentialsSubmitted" from="PromptBarrier/LoginPrompt" to="." method="OnLoginCredentialsSubmitted"]
@@ -331,3 +395,5 @@ text = "Close"
 [connection signal="pressed" from="PromptBarrier/LoginPrompt/VBoxContainer/MarginContainer/LoginForm/SubmitButton" to="PromptBarrier" method="HidePrompt"]
 [connection signal="pressed" from="PromptBarrier/LoginPrompt/VBoxContainer/MarginContainer/LoginForm/SubmitButton" to="PromptBarrier/LoginPrompt" method="OnSubmitButtonPressed"]
 [connection signal="pressed" from="PromptBarrier/ErrorMessagePrompt/VBoxContainer/MarginContainer/VBoxContainer/CloseButton" to="PromptBarrier" method="HidePrompt"]
+[connection signal="pressed" from="PromptBarrier/WorkerLoginPrompt/VBoxContainer/MarginContainer/VBoxContainer/CancelButton" to="." method="OnWorkerLoginCancelled"]
+[connection signal="pressed" from="PromptBarrier/WorkerLoginPrompt/VBoxContainer/MarginContainer/VBoxContainer/CancelButton" to="PromptBarrier" method="HidePrompt"]

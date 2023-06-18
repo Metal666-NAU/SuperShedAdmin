@@ -25,7 +25,13 @@ public partial class Root : Node {
 	public virtual ItemList? OnlineWorkersList { get; set; }
 
 	[Export]
+	public virtual PopupMenu? OnlineWorkerPopupMenu { get; set; }
+
+	[Export]
 	public virtual ItemList? OfflineWorkersList { get; set; }
+
+	[Export]
+	public virtual PopupMenu? OfflineWorkerPopupMenu { get; set; }
 
 	[Export]
 	public virtual Label? WorkerStats { get; set; }
@@ -81,6 +87,49 @@ public partial class Root : Node {
 		ShowWorkersButton!.Visible = !open;
 
 	}
+
+	public virtual void OnOnlineWorkerClicked(int index, Vector2 position, int mouseButton) =>
+		OnWorkerClicked(OnlineWorkersList!, OnlineWorkerPopupMenu!, index, position, mouseButton);
+
+	public virtual void OnOfflineWorkerClicked(int index, Vector2 position, int mouseButton) =>
+		OnWorkerClicked(OfflineWorkersList!, OfflineWorkerPopupMenu!, index, position, mouseButton);
+
+	public virtual void OnWorkerClicked(ItemList workerList, PopupMenu popupMenu, int index, Vector2 position, int mouseButton) {
+
+		if(mouseButton != (int) MouseButton.Right) {
+
+			return;
+
+		}
+
+		popupMenu!.Position = new Vector2I(Mathf.RoundToInt(position.X + workerList.GlobalPosition.X),
+											Mathf.RoundToInt(position.Y + workerList.GlobalPosition.Y));
+
+		popupMenu.SetMeta("workerId", workerList!.GetItemMetadata(index).AsString());
+
+		popupMenu.Popup();
+
+	}
+
+	public virtual void OnOfflineWorkerActionPressed(int index) {
+
+		switch(index) {
+
+			case 0: {
+
+				PromptBarrier!.ShowPrompt<WorkerLoginPrompt>().SetLoginCode("Generating Login Code...");
+
+				Client.SendStartWorkerAuth(OfflineWorkerPopupMenu!.GetMeta("workerId").AsString());
+
+				break;
+
+			}
+
+		}
+
+	}
+
+	public virtual void OnWorkerLoginCancelled() => Client.SendCancelWorkerAuth();
 
 	public virtual void OnServerLogsButtonToggled(bool pressed) {
 
@@ -223,6 +272,13 @@ public partial class Root : Node {
 			UpdateWorkerLists();
 
 		});
+
+		Client.Listen(Client.IncomingMessage.WorkerLoginCode,
+						data => PromptBarrier!.GetPrompt<WorkerLoginPrompt>()
+																.SetLoginCode(data.ReadString()));
+
+		Client.Listen(Client.IncomingMessage.WorkerAuthSuccess,
+						data => PromptBarrier!.HidePrompt());
 
 		Client.StartClient();
 
