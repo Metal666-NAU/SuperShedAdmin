@@ -2,6 +2,7 @@ using Godot;
 
 using SuperShedAdmin.Networking;
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -14,6 +15,12 @@ public partial class Root : Node {
 
 	[Export]
 	public virtual Button? ConnectionActionButton { get; set; }
+
+	[Export]
+	public virtual TabContainer? BuildingsTabContainer { get; set; }
+
+	[Export]
+	public virtual PackedScene? BuildingTab { get; set; }
 
 	[Export]
 	public virtual Button? ShowWorkersButton { get; set; }
@@ -46,6 +53,7 @@ public partial class Root : Node {
 	public virtual PromptBarrier? PromptBarrier { get; set; }
 
 	public virtual List<Worker> Workers { get; set; } = new();
+	public virtual List<Building> Buildings { get; set; } = new();
 
 	public virtual void OnLoginCredentialsSubmitted(string username, string password) {
 
@@ -172,8 +180,17 @@ public partial class Root : Node {
 
 					LogsList!.Clear();
 					Workers!.Clear();
+					Buildings!.Clear();
 
 					UpdateWorkerLists();
+
+					foreach(Node node in BuildingsTabContainer!.GetChildren()) {
+
+						node.QueueFree();
+
+					}
+
+					PromptBarrier!.HidePrompt();
 
 					break;
 
@@ -280,6 +297,53 @@ public partial class Root : Node {
 		Client.Listen(Client.IncomingMessage.WorkerAuthSuccess,
 						data => PromptBarrier!.HidePrompt());
 
+		Client.Listen(Client.IncomingMessage.Building, data => {
+
+			string buildingId = data.ReadString();
+			string buildingName = data.ReadString();
+			int buildingWidth = data.ReadInt32();
+			int buildingLength = data.ReadInt32();
+			int buildingHeight = data.ReadInt32();
+
+			Building building = new(buildingId,
+											buildingName,
+											new(buildingWidth,
+															buildingHeight,
+															buildingLength));
+
+			Building? existingBuilding =
+				Buildings.SingleOrDefault(building => building.Id == buildingId);
+
+			if(existingBuilding != null) {
+
+				BuildingTab.BuildingTab existingBuildingTab =
+					BuildingsTabContainer!.GetChildren()
+											.Cast<BuildingTab.BuildingTab>()
+											.Single(buildingTab =>
+														buildingTab.Building == existingBuilding);
+
+				existingBuildingTab.Name = Guid.NewGuid().ToString();
+
+				existingBuildingTab.QueueFree();
+
+				Buildings.Remove(existingBuilding);
+
+			}
+
+			Buildings.Add(building);
+
+			BuildingTab.BuildingTab buildingTab = BuildingTab!.Instantiate<BuildingTab.BuildingTab>();
+
+			buildingTab.Name = building.Name;
+			buildingTab.Building = building;
+
+			BuildingsTabContainer!.AddChild(buildingTab);
+
+			BuildingsTabContainer.SetTabMetadata(BuildingsTabContainer.GetTabIdxFromControl(buildingTab),
+													building.Id);
+
+		});
+
 		Client.StartClient();
 
 	}
@@ -353,5 +417,7 @@ public partial class Root : Node {
 	}
 
 	public record Worker(string Id, string Name, bool IsOnline);
+
+	public record Building(string Id, string Name, Vector3I Size);
 
 }

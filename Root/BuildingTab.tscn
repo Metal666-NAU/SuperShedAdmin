@@ -1,0 +1,242 @@
+[gd_scene load_steps=11 format=3 uid="uid://b00xhsn4jlefc"]
+
+[ext_resource type="Script" path="res://Root/BuildingTab/BuildingTab.cs" id="1_jnq5f"]
+[ext_resource type="Script" path="res://Root/BuildingTab/BuildingModel.cs" id="2_33k60"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_ht0ur"]
+
+[sub_resource type="Sky" id="Sky_gwtvm"]
+sky_material = SubResource("ProceduralSkyMaterial_ht0ur")
+
+[sub_resource type="Environment" id="Environment_04ldb"]
+background_mode = 2
+sky = SubResource("Sky_gwtvm")
+ambient_light_source = 3
+ambient_light_color = Color(1, 1, 1, 1)
+ssr_enabled = true
+ssao_enabled = true
+ssil_enabled = true
+sdfgi_enabled = true
+glow_enabled = true
+volumetric_fog_enabled = true
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_2f13u"]
+size = Vector2(4, 4)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_jhudy"]
+size = Vector2(4, 2)
+orientation = 2
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_looq3"]
+flip_faces = true
+size = Vector2(4, 2)
+orientation = 0
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_xn8p6"]
+flip_faces = true
+size = Vector2(4, 2)
+orientation = 2
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_1qx2j"]
+size = Vector2(4, 2)
+orientation = 0
+
+[node name="BuildingTab" type="Control" node_paths=PackedStringArray("PrimaryViewButton", "SecondaryViewButton", "PrimaryView", "BuildingModel", "SecondaryView", "BuildingWidthInput", "BuildingLengthInput", "BuildingHeightInput", "EditBuildingSizeButton", "SaveBuildingSizeButton", "CancelEditingBuildingSizeButton")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 1
+script = ExtResource("1_jnq5f")
+PrimaryViewButton = NodePath("VBoxContainer/HBoxContainer/PrimaryViewButton")
+SecondaryViewButton = NodePath("VBoxContainer/HBoxContainer/SecondaryViewButton")
+PrimaryView = NodePath("VBoxContainer/PrimaryView")
+BuildingModel = NodePath("VBoxContainer/PrimaryView/MarginContainer/SubViewportContainer/SubViewport/BuildingModelRoot/BuildingModel")
+SecondaryView = NodePath("VBoxContainer/SecondaryView")
+BuildingWidthInput = NodePath("VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer/BuildingWidthInput")
+BuildingLengthInput = NodePath("VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer/BuildingLengthInput")
+BuildingHeightInput = NodePath("VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer/BuildingHeightInput")
+EditBuildingSizeButton = NodePath("VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer/EditBuildingSizeButton")
+SaveBuildingSizeButton = NodePath("VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer/SaveBuildingSizeButton")
+CancelEditingBuildingSizeButton = NodePath("VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer/CancelEditingBuildingSizeButton")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="PrimaryViewButton" type="Button" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+toggle_mode = true
+button_pressed = true
+text = "3d View"
+
+[node name="SecondaryViewButton" type="Button" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+toggle_mode = true
+text = "Table View"
+
+[node name="PrimaryView" type="Panel" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/PrimaryView"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="VBoxContainer/PrimaryView/MarginContainer"]
+layout_mode = 2
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="VBoxContainer/PrimaryView/MarginContainer/SubViewportContainer"]
+handle_input_locally = false
+size = Vector2i(1142, 603)
+render_target_update_mode = 4
+
+[node name="BuildingModelRoot" type="Node3D" parent="VBoxContainer/PrimaryView/MarginContainer/SubViewportContainer/SubViewport"]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="VBoxContainer/PrimaryView/MarginContainer/SubViewportContainer/SubViewport/BuildingModelRoot"]
+
+[node name="Camera3D" type="Camera3D" parent="VBoxContainer/PrimaryView/MarginContainer/SubViewportContainer/SubViewport/BuildingModelRoot"]
+transform = Transform3D(1, 0, 0, 0, 0.5, 0.866025, 0, -0.866025, 0.5, 0, 5, 2)
+environment = SubResource("Environment_04ldb")
+
+[node name="BuildingModel" type="Node3D" parent="VBoxContainer/PrimaryView/MarginContainer/SubViewportContainer/SubViewport/BuildingModelRoot" node_paths=PackedStringArray("Floor", "NorthWall", "EastWall", "SouthWall", "WestWall")]
+transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, 0, 0)
+script = ExtResource("2_33k60")
+Floor = NodePath("Floor")
+NorthWall = NodePath("NorthWall")
+EastWall = NodePath("EastWall")
+SouthWall = NodePath("SouthWall")
+WestWall = NodePath("WestWall")
+
+[node name="Floor" type="MeshInstance3D" parent="VBoxContainer/PrimaryView/MarginContainer/SubViewportContainer/SubViewport/BuildingModelRoot/BuildingModel"]
+mesh = SubResource("PlaneMesh_2f13u")
+
+[node name="NorthWall" type="MeshInstance3D" parent="VBoxContainer/PrimaryView/MarginContainer/SubViewportContainer/SubViewport/BuildingModelRoot/BuildingModel"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -2)
+mesh = SubResource("PlaneMesh_jhudy")
+skeleton = NodePath("../WestWall")
+
+[node name="EastWall" type="MeshInstance3D" parent="VBoxContainer/PrimaryView/MarginContainer/SubViewportContainer/SubViewport/BuildingModelRoot/BuildingModel"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 1, 0)
+mesh = SubResource("PlaneMesh_looq3")
+skeleton = NodePath("../SouthWall")
+
+[node name="SouthWall" type="MeshInstance3D" parent="VBoxContainer/PrimaryView/MarginContainer/SubViewportContainer/SubViewport/BuildingModelRoot/BuildingModel"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 2)
+mesh = SubResource("PlaneMesh_xn8p6")
+skeleton = NodePath("../Floor")
+
+[node name="WestWall" type="MeshInstance3D" parent="VBoxContainer/PrimaryView/MarginContainer/SubViewportContainer/SubViewport/BuildingModelRoot/BuildingModel"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 1, 0)
+mesh = SubResource("PlaneMesh_1qx2j")
+skeleton = NodePath("../EastWall")
+
+[node name="SecondaryView" type="Panel" parent="VBoxContainer"]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/SecondaryView"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Control" type="Control" parent="VBoxContainer/SecondaryView/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Panel" type="Panel" parent="VBoxContainer/SecondaryView/VBoxContainer"]
+custom_minimum_size = Vector2(0, 35)
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/SecondaryView/VBoxContainer/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer"]
+custom_minimum_size = Vector2(125, 0)
+layout_mode = 2
+text = "Building Size:"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BuildingWidthInput" type="SpinBox" parent="VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer"]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+min_value = 1.0
+max_value = 1000.0
+value = 1.0
+rounded = true
+editable = false
+prefix = "Width"
+suffix = "m"
+
+[node name="BuildingLengthInput" type="SpinBox" parent="VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer"]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+min_value = 1.0
+max_value = 1000.0
+value = 1.0
+rounded = true
+editable = false
+prefix = "Length"
+suffix = "m"
+
+[node name="BuildingHeightInput" type="SpinBox" parent="VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer"]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+min_value = 1.0
+max_value = 1000.0
+value = 1.0
+rounded = true
+editable = false
+prefix = "Height"
+suffix = "m"
+
+[node name="EditBuildingSizeButton" type="Button" parent="VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer"]
+layout_mode = 2
+text = "Edit"
+
+[node name="SaveBuildingSizeButton" type="Button" parent="VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer"]
+visible = false
+layout_mode = 2
+text = "Save"
+
+[node name="CancelEditingBuildingSizeButton" type="Button" parent="VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer"]
+visible = false
+layout_mode = 2
+text = "Cancel"
+
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/PrimaryViewButton" to="." method="OnViewToggled" binds= [true]]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/SecondaryViewButton" to="." method="OnViewToggled" binds= [false]]
+[connection signal="value_changed" from="VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer/BuildingWidthInput" to="." method="OnBuildingSizeChanged"]
+[connection signal="value_changed" from="VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer/BuildingLengthInput" to="." method="OnBuildingSizeChanged"]
+[connection signal="value_changed" from="VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer/BuildingHeightInput" to="." method="OnBuildingSizeChanged"]
+[connection signal="pressed" from="VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer/EditBuildingSizeButton" to="." method="OnEditBuildingSizeButtonPressed"]
+[connection signal="pressed" from="VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer/SaveBuildingSizeButton" to="." method="OnSaveBuildingSizeButtonPressed"]
+[connection signal="pressed" from="VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer/CancelEditingBuildingSizeButton" to="." method="OnCancelEditingBuildingSizeButtonPressed"]

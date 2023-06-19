@@ -1,7 +1,8 @@
-[gd_scene load_steps=9 format=3 uid="uid://1hswngw0hyby"]
+[gd_scene load_steps=10 format=3 uid="uid://1hswngw0hyby"]
 
 [ext_resource type="Script" path="res://Root/Root.cs" id="1_h0rbi"]
 [ext_resource type="Script" path="res://Root/LoadingBarrier.cs" id="2_8ct6s"]
+[ext_resource type="PackedScene" uid="uid://b00xhsn4jlefc" path="res://Root/BuildingTab.tscn" id="2_edplf"]
 [ext_resource type="LabelSettings" uid="uid://l0l2jpoyadan" path="res://Root/ListHeader.tres" id="2_nwanh"]
 [ext_resource type="Script" path="res://Root/PromptBarrier.cs" id="2_tos5a"]
 [ext_resource type="Script" path="res://Root/LoginPrompt.cs" id="3_uohfb"]
@@ -9,7 +10,7 @@
 [ext_resource type="Script" path="res://Root/ErrorMessagePrompt.cs" id="6_punoj"]
 [ext_resource type="Script" path="res://Root/WorkerLoginPrompt.cs" id="8_rxv05"]
 
-[node name="Root" type="Panel" node_paths=PackedStringArray("ConnectionStatusLabel", "ConnectionActionButton", "ShowWorkersButton", "WorkersPanel", "OnlineWorkersList", "OnlineWorkerPopupMenu", "OfflineWorkersList", "OfflineWorkerPopupMenu", "WorkerStats", "LogsList", "LoadingBarrier", "PromptBarrier")]
+[node name="Root" type="Panel" node_paths=PackedStringArray("ConnectionStatusLabel", "ConnectionActionButton", "BuildingsTabContainer", "ShowWorkersButton", "WorkersPanel", "OnlineWorkersList", "OnlineWorkerPopupMenu", "OfflineWorkersList", "OfflineWorkerPopupMenu", "WorkerStats", "LogsList", "LoadingBarrier", "PromptBarrier")]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -19,6 +20,8 @@ focus_mode = 1
 script = ExtResource("1_h0rbi")
 ConnectionStatusLabel = NodePath("Home/TopBar/ConnectionStatusLabel")
 ConnectionActionButton = NodePath("Home/TopBar/ConnectionActionButton")
+BuildingsTabContainer = NodePath("Home/ContentPanel/VSplitContainer/HSplitContainer/BuildingsTabContainer")
+BuildingTab = ExtResource("2_edplf")
 ShowWorkersButton = NodePath("Home/ContentPanel/ShowWorkersButton")
 WorkersPanel = NodePath("Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel")
 OnlineWorkersList = NodePath("Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer/OnlineWorkersList")
@@ -58,17 +61,21 @@ layout_mode = 2
 size_flags_vertical = 3
 
 [node name="VSplitContainer" type="VSplitContainer" parent="Home/ContentPanel"]
-layout_mode = 2
-offset_top = 4.0
-offset_right = 1152.0
-offset_bottom = 560.0
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="HSplitContainer" type="HSplitContainer" parent="Home/ContentPanel/VSplitContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+focus_mode = 1
 
-[node name="Panel" type="Panel" parent="Home/ContentPanel/VSplitContainer/HSplitContainer"]
+[node name="BuildingsTabContainer" type="TabContainer" parent="Home/ContentPanel/VSplitContainer/HSplitContainer"]
+custom_minimum_size = Vector2(250, 200)
 layout_mode = 2
 size_flags_horizontal = 3
 focus_mode = 1

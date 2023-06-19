@@ -43,7 +43,11 @@ public static class Client {
 
 		}
 
-		WebsocketClient = new(new Uri("ws://localhost:8181/admin"));
+		WebsocketClient = new(new Uri("ws://localhost:8181/admin")) {
+
+			ReconnectTimeout = TimeSpan.FromMinutes(2)
+
+		};
 
 		SetConnectionStatus(ConnectionStatus.Connecting);
 
@@ -153,6 +157,14 @@ public static class Client {
 	public static void SendCancelWorkerAuth() =>
 		Send((byte) OutgoingMessage.CancelWorkerAuth);
 
+	public static void SendUpdateBuilding(string buildingId,
+											string buildingName,
+											int buildingWidth,
+											int buildingLength,
+											int buildingHeight) =>
+		Send((byte) OutgoingMessage.UpdateBuilding,
+				buildingId, buildingName, buildingWidth, buildingLength, buildingHeight);
+
 	private static void Send(byte command, params object[] data) {
 
 		using MemoryStream memoryStream = new();
@@ -201,14 +213,16 @@ public static class Client {
 		Worker,
 		WorkerStatus,
 		WorkerLoginCode,
-		WorkerAuthSuccess
+		WorkerAuthSuccess,
+		Building
 
 	}
 
 	public enum OutgoingMessage {
 
 		StartWorkerAuth,
-		CancelWorkerAuth
+		CancelWorkerAuth,
+		UpdateBuilding
 
 	}
 
