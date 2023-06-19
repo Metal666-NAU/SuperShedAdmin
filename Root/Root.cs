@@ -119,6 +119,22 @@ public partial class Root : Node {
 
 	}
 
+	public virtual void OnOnlineWorkerActionPressed(int index) {
+
+		switch(index) {
+
+			case 0: {
+
+				Client.SendRevokeWorkerAuth(OnlineWorkerPopupMenu!.GetMeta("workerId").AsString());
+
+				break;
+
+			}
+
+		}
+
+	}
+
 	public virtual void OnOfflineWorkerActionPressed(int index) {
 
 		switch(index) {
@@ -128,6 +144,14 @@ public partial class Root : Node {
 				PromptBarrier!.ShowPrompt<WorkerLoginPrompt>().SetLoginCode("Generating Login Code...");
 
 				Client.SendStartWorkerAuth(OfflineWorkerPopupMenu!.GetMeta("workerId").AsString());
+
+				break;
+
+			}
+
+			case 1: {
+
+				Client.SendRevokeWorkerAuth(OfflineWorkerPopupMenu!.GetMeta("workerId").AsString());
 
 				break;
 

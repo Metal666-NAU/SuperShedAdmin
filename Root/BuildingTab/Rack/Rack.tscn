@@ -9,10 +9,15 @@ roughness = 0.5
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_61wv3"]
 transparency = 1
+blend_mode = 1
 albedo_color = Color(1, 0, 0, 0.784314)
 metallic_specular = 1.0
+roughness = 0.5
 emission_enabled = true
-emission = Color(0.882353, 0.27451, 0.294118, 1)
+emission = Color(0.572549, 0.133333, 0.156863, 1)
+emission_energy_multiplier = 2.0
+subsurf_scatter_enabled = true
+subsurf_scatter_strength = 0.1
 refraction_enabled = true
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_kuhf5"]

@@ -111,7 +111,7 @@ size_flags_vertical = 3
 
 [node name="OnlineWorkerPopupMenu" type="PopupMenu" parent="Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer/OnlineWorkersList"]
 item_count = 1
-item_0/text = "Log Out"
+item_0/text = "Revoke Auth"
 item_0/id = 0
 
 [node name="Label2" type="Label" parent="Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer"]
@@ -127,9 +127,11 @@ layout_mode = 2
 size_flags_vertical = 3
 
 [node name="OfflineWorkerPopupMenu" type="PopupMenu" parent="Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer/OfflineWorkersList"]
-item_count = 1
+item_count = 2
 item_0/text = "Get Login Code"
 item_0/id = 0
+item_1/text = "Revoke Auth"
+item_1/id = 1
 
 [node name="WorkerStats" type="Label" parent="Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer"]
 layout_mode = 2
@@ -393,6 +395,7 @@ text = "Cancel"
 [connection signal="pressed" from="Home/TopBar/ConnectionActionButton" to="." method="OnConnectionActionButtonPressed"]
 [connection signal="pressed" from="Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer/HideWorkersButton" to="." method="OnWorkersPanelToggled" binds= [false]]
 [connection signal="item_clicked" from="Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer/OnlineWorkersList" to="." method="OnOnlineWorkerClicked"]
+[connection signal="index_pressed" from="Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer/OnlineWorkersList/OnlineWorkerPopupMenu" to="." method="OnOnlineWorkerActionPressed"]
 [connection signal="item_clicked" from="Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer/OfflineWorkersList" to="." method="OnOfflineWorkerClicked"]
 [connection signal="index_pressed" from="Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer/OfflineWorkersList/OfflineWorkerPopupMenu" to="." method="OnOfflineWorkerActionPressed"]
 [connection signal="pressed" from="Home/ContentPanel/ShowWorkersButton" to="." method="OnWorkersPanelToggled" binds= [true]]

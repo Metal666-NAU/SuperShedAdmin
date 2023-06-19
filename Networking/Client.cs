@@ -155,6 +155,8 @@ public static class Client {
 	public static void SendCancelWorkerAuth() =>
 		Send((byte) OutgoingMessage.CancelWorkerAuth);
 
+	public static void SendRevokeWorkerAuth(string workerId) =>
+		Send((byte) OutgoingMessage.RevokeWorkerAuth, workerId);
 	public static void SendUpdateBuilding(string buildingId,
 											string buildingName,
 											int buildingWidth,
@@ -235,6 +237,7 @@ public static class Client {
 
 		StartWorkerAuth,
 		CancelWorkerAuth,
+		RevokeWorkerAuth,
 		UpdateBuilding,
 		CreateRack,
 		UpdateRack

@@ -1,5 +1,6 @@
 using Godot;
 
+using System;
 using System.Collections.Generic;
 
 namespace SuperShedAdmin.Root.BuildingTab.Rack;
@@ -23,9 +24,11 @@ public partial class Rack : Node3D {
 	public virtual int Shelves { get; set; }
 	public virtual float Spacing { get; set; }
 
+	public event Action? Selected;
+
 	public virtual List<MeshInstance3D> Part { get; set; } = new();
 
-	public virtual bool IsSelected { get; set; } = false;
+	public virtual bool IsSelected { get; set; }
 
 	public virtual void OnCollisionAreaInputEvent(Node camera,
 													InputEvent inputEvent,
@@ -60,6 +63,12 @@ public partial class Rack : Node3D {
 				part.Mesh.SurfaceSetMaterial(i, IsSelected ? SelectedMaterial : NormalMaterial);
 
 			}
+
+		}
+
+		if(IsSelected) {
+
+			Selected?.Invoke();
 
 		}
 
@@ -120,7 +129,11 @@ public partial class Rack : Node3D {
 
 		}
 
-		(CollisionBox!.Shape as BoxShape3D)!.Size = new(Size.X, Shelves * Spacing, Size.Y);
+		float collisionBoxHeight = Shelves * Spacing;
+
+		(CollisionBox!.Shape as BoxShape3D)!.Size = new(Size.X, collisionBoxHeight, Size.Y);
+
+		CollisionBox.Position = new(0, collisionBoxHeight / 2, 0);
 
 	}
 
