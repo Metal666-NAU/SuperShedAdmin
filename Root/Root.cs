@@ -344,6 +344,37 @@ public partial class Root : Node {
 
 		});
 
+		Client.Listen(Client.IncomingMessage.Rack, data => {
+
+			string rackId = data.ReadString();
+			string buildingId = data.ReadString();
+			int rackX = data.ReadInt32();
+			int rackZ = data.ReadInt32();
+			int rackWidth = data.ReadInt32();
+			int rackLength = data.ReadInt32();
+			int rackShelves = data.ReadInt32();
+			float rackSpacing = data.ReadSingle();
+
+			BuildingTab.BuildingTab? buildingTab =
+				BuildingsTabContainer!.GetChildren()
+										.Cast<BuildingTab.BuildingTab>()
+										.FirstOrDefault(buildingTab =>
+															buildingTab.Building!.Id.Equals(buildingId));
+
+			if(buildingTab == null) {
+
+				return;
+
+			}
+
+			buildingTab.UpdateRack(rackId,
+									new(rackX, rackZ),
+									new(rackWidth, rackLength),
+									rackShelves,
+									rackSpacing);
+
+		});
+
 		Client.StartClient();
 
 	}

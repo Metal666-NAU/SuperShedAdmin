@@ -2,6 +2,8 @@ using Godot;
 
 using SuperShedAdmin.Networking;
 
+using System.Collections.Generic;
+
 using static SuperShedAdmin.Root.Root;
 
 namespace SuperShedAdmin.Root.BuildingTab;
@@ -18,7 +20,16 @@ public partial class BuildingTab : Control {
 	public virtual Panel? PrimaryView { get; set; }
 
 	[Export]
+	public virtual Viewport? BuildingModelViewport { get; set; }
+
+	[Export]
 	public virtual BuildingModel? BuildingModel { get; set; }
+
+	[Export]
+	public virtual PopupMenu? BuildingModelPopupMenu { get; set; }
+
+	[Export]
+	public virtual Panel? SidePanel { get; set; }
 
 	[Export]
 	public virtual Panel? SecondaryView { get; set; }
@@ -43,6 +54,9 @@ public partial class BuildingTab : Control {
 
 	public virtual Building? Building { get; set; }
 
+	public virtual Dictionary<string, (Vector2I Position, Vector2I Size, int Shelves, float Spacing)> Racks { get; set; }
+		= new();
+
 	public virtual void OnViewToggled(bool primaryView) {
 
 		PrimaryViewButton!.ButtonPressed = primaryView;
@@ -50,6 +64,49 @@ public partial class BuildingTab : Control {
 
 		PrimaryView!.Visible = primaryView;
 		SecondaryView!.Visible = !primaryView;
+
+	}
+
+	public virtual void OnBuildingModelViewportContainerGuiInput(InputEvent inputEvent) {
+
+		if(inputEvent is not InputEventMouseButton inputEventMouseButton) {
+
+			return;
+
+		}
+
+		if(inputEventMouseButton.ButtonIndex != MouseButton.Right) {
+
+			return;
+
+		}
+
+		if(!inputEventMouseButton.Pressed) {
+
+			return;
+
+		}
+
+		BuildingModelPopupMenu!.Position = new(Mathf.RoundToInt(inputEventMouseButton.GlobalPosition.X),
+														Mathf.RoundToInt(inputEventMouseButton.GlobalPosition.Y));
+
+		BuildingModelPopupMenu.Popup();
+
+	}
+
+	public virtual void OnBuildingModelActionPressed(int index) {
+
+		switch(index) {
+
+			case 0: {
+
+				Client.SendCreateRack(Building!.Id);
+
+				break;
+
+			}
+
+		}
 
 	}
 
@@ -113,6 +170,26 @@ public partial class BuildingTab : Control {
 		BuildingWidthInput!.Value = Building!.Size.X;
 		BuildingLengthInput!.Value = Building!.Size.Z;
 		BuildingHeightInput!.Value = Building!.Size.Y;
+
+	}
+
+	public virtual void UpdateRack(string rackId,
+									Vector2I position,
+									Vector2I size,
+									int shelves,
+									float spacing) {
+
+		Racks[rackId] = (position, size, shelves, spacing);
+
+		BuildingModel!.UpdateRack(rackId, position, size, shelves, spacing);
+
+	}
+
+	protected override void Dispose(bool disposing) {
+
+		base.Dispose(disposing);
+
+		Client.StopListening(Client.IncomingMessage.Rack);
 
 	}
 

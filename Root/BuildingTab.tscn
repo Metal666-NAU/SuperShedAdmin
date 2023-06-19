@@ -1,7 +1,8 @@
-[gd_scene load_steps=11 format=3 uid="uid://b00xhsn4jlefc"]
+[gd_scene load_steps=13 format=3 uid="uid://b00xhsn4jlefc"]
 
 [ext_resource type="Script" path="res://Root/BuildingTab/BuildingTab.cs" id="1_jnq5f"]
 [ext_resource type="Script" path="res://Root/BuildingTab/BuildingModel.cs" id="2_33k60"]
+[ext_resource type="PackedScene" uid="uid://dmspiey8n3j2" path="res://Root/BuildingTab/Rack/Rack.tscn" id="3_e0s76"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_ht0ur"]
 
@@ -19,29 +20,28 @@ ssil_enabled = true
 sdfgi_enabled = true
 glow_enabled = true
 volumetric_fog_enabled = true
+volumetric_fog_density = 0.02
+volumetric_fog_albedo = Color(0.784314, 0.784314, 0.784314, 1)
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_2f13u"]
 size = Vector2(4, 4)
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_jhudy"]
-size = Vector2(4, 2)
-orientation = 2
+[sub_resource type="BoxMesh" id="BoxMesh_clqy3"]
+size = Vector3(4, 2, 0.1)
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_looq3"]
-flip_faces = true
-size = Vector2(4, 2)
-orientation = 0
+[sub_resource type="BoxMesh" id="BoxMesh_3v4bo"]
+size = Vector3(0.1, 2, 4)
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_xn8p6"]
-flip_faces = true
-size = Vector2(4, 2)
-orientation = 2
+[sub_resource type="BoxMesh" id="BoxMesh_313a7"]
+size = Vector3(4, 2, 0.1)
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_1qx2j"]
-size = Vector2(4, 2)
-orientation = 0
+[sub_resource type="BoxMesh" id="BoxMesh_nju1i"]
+size = Vector3(0.1, 2, 4)
 
-[node name="BuildingTab" type="Control" node_paths=PackedStringArray("PrimaryViewButton", "SecondaryViewButton", "PrimaryView", "BuildingModel", "SecondaryView", "BuildingWidthInput", "BuildingLengthInput", "BuildingHeightInput", "EditBuildingSizeButton", "SaveBuildingSizeButton", "CancelEditingBuildingSizeButton")]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ey1gd"]
+bg_color = Color(0, 0, 0, 0.294118)
+
+[node name="BuildingTab" type="Control" node_paths=PackedStringArray("PrimaryViewButton", "SecondaryViewButton", "PrimaryView", "BuildingModelViewport", "BuildingModel", "BuildingModelPopupMenu", "SidePanel", "SecondaryView", "BuildingWidthInput", "BuildingLengthInput", "BuildingHeightInput", "EditBuildingSizeButton", "SaveBuildingSizeButton", "CancelEditingBuildingSizeButton")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -53,7 +53,10 @@ script = ExtResource("1_jnq5f")
 PrimaryViewButton = NodePath("VBoxContainer/HBoxContainer/PrimaryViewButton")
 SecondaryViewButton = NodePath("VBoxContainer/HBoxContainer/SecondaryViewButton")
 PrimaryView = NodePath("VBoxContainer/PrimaryView")
-BuildingModel = NodePath("VBoxContainer/PrimaryView/MarginContainer/SubViewportContainer/SubViewport/BuildingModelRoot/BuildingModel")
+BuildingModelViewport = NodePath("VBoxContainer/PrimaryView/MarginContainer/BuildingModelViewportContainer/BuildingModelViewport")
+BuildingModel = NodePath("VBoxContainer/PrimaryView/MarginContainer/BuildingModelViewportContainer/BuildingModelViewport/BuildingModelRoot/BuildingModel")
+BuildingModelPopupMenu = NodePath("VBoxContainer/PrimaryView/MarginContainer/BuildingModelPopupMenu")
+SidePanel = NodePath("VBoxContainer/PrimaryView/MarginContainer/SidePanel")
 SecondaryView = NodePath("VBoxContainer/SecondaryView")
 BuildingWidthInput = NodePath("VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer/BuildingWidthInput")
 BuildingLengthInput = NodePath("VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer/BuildingLengthInput")
@@ -100,54 +103,73 @@ theme_override_constants/margin_top = 5
 theme_override_constants/margin_right = 5
 theme_override_constants/margin_bottom = 5
 
-[node name="SubViewportContainer" type="SubViewportContainer" parent="VBoxContainer/PrimaryView/MarginContainer"]
+[node name="BuildingModelViewportContainer" type="SubViewportContainer" parent="VBoxContainer/PrimaryView/MarginContainer"]
 layout_mode = 2
 stretch = true
 
-[node name="SubViewport" type="SubViewport" parent="VBoxContainer/PrimaryView/MarginContainer/SubViewportContainer"]
+[node name="BuildingModelViewport" type="SubViewport" parent="VBoxContainer/PrimaryView/MarginContainer/BuildingModelViewportContainer"]
 handle_input_locally = false
 size = Vector2i(1142, 603)
 render_target_update_mode = 4
 
-[node name="BuildingModelRoot" type="Node3D" parent="VBoxContainer/PrimaryView/MarginContainer/SubViewportContainer/SubViewport"]
+[node name="BuildingModelRoot" type="Node3D" parent="VBoxContainer/PrimaryView/MarginContainer/BuildingModelViewportContainer/BuildingModelViewport"]
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="VBoxContainer/PrimaryView/MarginContainer/SubViewportContainer/SubViewport/BuildingModelRoot"]
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="VBoxContainer/PrimaryView/MarginContainer/BuildingModelViewportContainer/BuildingModelViewport/BuildingModelRoot"]
+transform = Transform3D(0.866025, 0.353553, -0.353553, 0, 0.707107, 0.707107, 0.5, -0.612372, 0.612372, 0, 10, 0)
+shadow_enabled = true
 
-[node name="Camera3D" type="Camera3D" parent="VBoxContainer/PrimaryView/MarginContainer/SubViewportContainer/SubViewport/BuildingModelRoot"]
+[node name="Camera3D" type="Camera3D" parent="VBoxContainer/PrimaryView/MarginContainer/BuildingModelViewportContainer/BuildingModelViewport/BuildingModelRoot"]
 transform = Transform3D(1, 0, 0, 0, 0.5, 0.866025, 0, -0.866025, 0.5, 0, 5, 2)
 environment = SubResource("Environment_04ldb")
+far = 500.0
 
-[node name="BuildingModel" type="Node3D" parent="VBoxContainer/PrimaryView/MarginContainer/SubViewportContainer/SubViewport/BuildingModelRoot" node_paths=PackedStringArray("Floor", "NorthWall", "EastWall", "SouthWall", "WestWall")]
-transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, 0, 0)
+[node name="BuildingModel" type="Node3D" parent="VBoxContainer/PrimaryView/MarginContainer/BuildingModelViewportContainer/BuildingModelViewport/BuildingModelRoot" node_paths=PackedStringArray("Floor", "NorthWall", "EastWall", "SouthWall", "WestWall", "RackContainer")]
 script = ExtResource("2_33k60")
 Floor = NodePath("Floor")
-NorthWall = NodePath("NorthWall")
-EastWall = NodePath("EastWall")
-SouthWall = NodePath("SouthWall")
-WestWall = NodePath("WestWall")
+NorthWall = NodePath("Walls/NorthWall")
+EastWall = NodePath("Walls/EastWall")
+SouthWall = NodePath("Walls/SouthWall")
+WestWall = NodePath("Walls/WestWall")
+RackContainer = NodePath("RackContainer")
+Rack = ExtResource("3_e0s76")
 
-[node name="Floor" type="MeshInstance3D" parent="VBoxContainer/PrimaryView/MarginContainer/SubViewportContainer/SubViewport/BuildingModelRoot/BuildingModel"]
+[node name="Floor" type="MeshInstance3D" parent="VBoxContainer/PrimaryView/MarginContainer/BuildingModelViewportContainer/BuildingModelViewport/BuildingModelRoot/BuildingModel"]
 mesh = SubResource("PlaneMesh_2f13u")
 
-[node name="NorthWall" type="MeshInstance3D" parent="VBoxContainer/PrimaryView/MarginContainer/SubViewportContainer/SubViewport/BuildingModelRoot/BuildingModel"]
+[node name="Walls" type="Node3D" parent="VBoxContainer/PrimaryView/MarginContainer/BuildingModelViewportContainer/BuildingModelViewport/BuildingModelRoot/BuildingModel"]
+
+[node name="NorthWall" type="MeshInstance3D" parent="VBoxContainer/PrimaryView/MarginContainer/BuildingModelViewportContainer/BuildingModelViewport/BuildingModelRoot/BuildingModel/Walls"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -2)
-mesh = SubResource("PlaneMesh_jhudy")
+mesh = SubResource("BoxMesh_clqy3")
 skeleton = NodePath("../WestWall")
 
-[node name="EastWall" type="MeshInstance3D" parent="VBoxContainer/PrimaryView/MarginContainer/SubViewportContainer/SubViewport/BuildingModelRoot/BuildingModel"]
+[node name="EastWall" type="MeshInstance3D" parent="VBoxContainer/PrimaryView/MarginContainer/BuildingModelViewportContainer/BuildingModelViewport/BuildingModelRoot/BuildingModel/Walls"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 1, 0)
-mesh = SubResource("PlaneMesh_looq3")
+mesh = SubResource("BoxMesh_3v4bo")
 skeleton = NodePath("../SouthWall")
 
-[node name="SouthWall" type="MeshInstance3D" parent="VBoxContainer/PrimaryView/MarginContainer/SubViewportContainer/SubViewport/BuildingModelRoot/BuildingModel"]
+[node name="SouthWall" type="MeshInstance3D" parent="VBoxContainer/PrimaryView/MarginContainer/BuildingModelViewportContainer/BuildingModelViewport/BuildingModelRoot/BuildingModel/Walls"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 2)
-mesh = SubResource("PlaneMesh_xn8p6")
-skeleton = NodePath("../Floor")
+mesh = SubResource("BoxMesh_313a7")
+skeleton = NodePath("../../Floor")
 
-[node name="WestWall" type="MeshInstance3D" parent="VBoxContainer/PrimaryView/MarginContainer/SubViewportContainer/SubViewport/BuildingModelRoot/BuildingModel"]
+[node name="WestWall" type="MeshInstance3D" parent="VBoxContainer/PrimaryView/MarginContainer/BuildingModelViewportContainer/BuildingModelViewport/BuildingModelRoot/BuildingModel/Walls"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 1, 0)
-mesh = SubResource("PlaneMesh_1qx2j")
+mesh = SubResource("BoxMesh_nju1i")
 skeleton = NodePath("../EastWall")
+
+[node name="RackContainer" type="Node3D" parent="VBoxContainer/PrimaryView/MarginContainer/BuildingModelViewportContainer/BuildingModelViewport/BuildingModelRoot/BuildingModel"]
+
+[node name="SidePanel" type="Panel" parent="VBoxContainer/PrimaryView/MarginContainer"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_ey1gd")
+
+[node name="BuildingModelPopupMenu" type="PopupMenu" parent="VBoxContainer/PrimaryView/MarginContainer"]
+item_count = 1
+item_0/text = "+ Add Rack"
+item_0/id = 0
 
 [node name="SecondaryView" type="Panel" parent="VBoxContainer"]
 visible = false
@@ -234,6 +256,8 @@ text = "Cancel"
 
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/PrimaryViewButton" to="." method="OnViewToggled" binds= [true]]
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/SecondaryViewButton" to="." method="OnViewToggled" binds= [false]]
+[connection signal="gui_input" from="VBoxContainer/PrimaryView/MarginContainer/BuildingModelViewportContainer" to="." method="OnBuildingModelViewportContainerGuiInput"]
+[connection signal="index_pressed" from="VBoxContainer/PrimaryView/MarginContainer/BuildingModelPopupMenu" to="." method="OnBuildingModelActionPressed"]
 [connection signal="value_changed" from="VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer/BuildingWidthInput" to="." method="OnBuildingSizeChanged"]
 [connection signal="value_changed" from="VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer/BuildingLengthInput" to="." method="OnBuildingSizeChanged"]
 [connection signal="value_changed" from="VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer/BuildingHeightInput" to="." method="OnBuildingSizeChanged"]

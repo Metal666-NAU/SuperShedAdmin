@@ -23,7 +23,8 @@ public static class Client {
 
 	public static DisconnectionInfo? DisconnectionInfo { get; set; }
 
-	public static Dictionary<IncomingMessage, List<Action<BinaryReader>>> Listeners { get; set; } = new();
+	public static Dictionary<IncomingMessage, Action<BinaryReader>> Listeners { get; set; }
+		= new();
 
 	public static ConnectionStatus ConnectionStatus { get; set; }
 
@@ -105,9 +106,13 @@ public static class Client {
 
 					IncomingMessage command = (IncomingMessage) binaryReader.ReadByte();
 
-					Listeners.GetValueOrDefault(command)?
-								.ForEach(listener =>
-											RunOnMainThread(() => listener.Invoke(binaryReader)));
+					if(!Listeners.ContainsKey(command)) {
+
+						return;
+
+					}
+
+					RunOnMainThread(() => Listeners[command].Invoke(binaryReader));
 
 					break;
 
@@ -121,17 +126,10 @@ public static class Client {
 
 	}
 
-	public static void Listen(IncomingMessage incomingMessage, Action<BinaryReader> listener) {
+	public static void Listen(IncomingMessage incomingMessage, Action<BinaryReader> listener) => Listeners[incomingMessage] = listener;
 
-		if(!Listeners.ContainsKey(incomingMessage)) {
-
-			Listeners[incomingMessage] = new();
-
-		}
-
-		Listeners[incomingMessage].Add(listener);
-
-	}
+	public static void StopListening(IncomingMessage incomingMessage) =>
+		Listeners.Remove(incomingMessage);
 
 	public static void Authenticate(string username, string password) =>
 		Authenticate(new AuthRequest() {
@@ -164,6 +162,20 @@ public static class Client {
 											int buildingHeight) =>
 		Send((byte) OutgoingMessage.UpdateBuilding,
 				buildingId, buildingName, buildingWidth, buildingLength, buildingHeight);
+
+	public static void SendCreateRack(string buildingId) =>
+		Send((byte) OutgoingMessage.CreateRack,
+				buildingId);
+
+	public static void SendUpdateRack(string buildingId,
+										int rackX,
+										int rackZ,
+										int rackWidth,
+										int rackLength,
+										int rackShelves,
+										float rackSpacing) =>
+		Send((byte) OutgoingMessage.UpdateRack,
+				buildingId, rackX, rackZ, rackWidth, rackLength, rackShelves, rackSpacing);
 
 	private static void Send(byte command, params object[] data) {
 
@@ -214,7 +226,8 @@ public static class Client {
 		WorkerStatus,
 		WorkerLoginCode,
 		WorkerAuthSuccess,
-		Building
+		Building,
+		Rack
 
 	}
 
@@ -222,7 +235,9 @@ public static class Client {
 
 		StartWorkerAuth,
 		CancelWorkerAuth,
-		UpdateBuilding
+		UpdateBuilding,
+		CreateRack,
+		UpdateRack
 
 	}
 
