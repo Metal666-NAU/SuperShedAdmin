@@ -56,6 +56,9 @@ public partial class BuildingTab : Control {
 	public virtual Button? SaveRackSettingsButton { get; set; }
 
 	[Export]
+	public virtual Button? DeleteRackButton { get; set; }
+
+	[Export]
 	public virtual Panel? SecondaryView { get; set; }
 
 	[Export]
@@ -80,6 +83,8 @@ public partial class BuildingTab : Control {
 
 	public virtual Dictionary<string, (Vector2I Position, Vector2I Size, int Shelves, float Spacing, float Rotation)> Racks { get; set; }
 		= new();
+
+	public virtual bool ReallyWantsToDeleteRack { get; set; }
 
 	public virtual void OnViewToggled(bool primaryView) {
 
@@ -240,6 +245,24 @@ public partial class BuildingTab : Control {
 
 	}
 
+	public virtual void OnDeleteRackButtonPressed() {
+
+		if(ReallyWantsToDeleteRack) {
+
+			Client.SendDeleteRack(BuildingModel!.SelectedRack!);
+
+			RackSettingsPanel!.Hide();
+
+			return;
+
+		}
+
+		ReallyWantsToDeleteRack = true;
+
+		DeleteRackButton!.Text = "Delete! :O";
+
+	}
+
 	public override void _Ready() {
 
 		ResetBuildingSizeInputs();
@@ -251,6 +274,10 @@ public partial class BuildingTab : Control {
 		BuildingModel.RackSelected += () => {
 
 			RackSettingsPanel!.Show();
+
+			ReallyWantsToDeleteRack = false;
+
+			DeleteRackButton!.Text = "Delete?";
 
 			(Vector2I Position, Vector2I Size, int Shelves, float Spacing, float Rotation) =
 				Racks[BuildingModel!.SelectedRack!];
@@ -306,11 +333,11 @@ public partial class BuildingTab : Control {
 
 	}
 
-	protected override void Dispose(bool disposing) {
+	public virtual void RemoveRack(string rackId) {
 
-		base.Dispose(disposing);
+		Racks.Remove(rackId);
 
-		Client.StopListening(Client.IncomingMessage.Rack);
+		BuildingModel!.RemoveRack(rackId);
 
 	}
 

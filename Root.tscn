@@ -18,8 +18,8 @@ grow_horizontal = 2
 grow_vertical = 2
 focus_mode = 1
 script = ExtResource("1_h0rbi")
-ConnectionStatusLabel = NodePath("Home/TopBar/ConnectionStatusLabel")
-ConnectionActionButton = NodePath("Home/TopBar/ConnectionActionButton")
+ConnectionStatusLabel = NodePath("Home/BottomBar/MarginContainer/HBoxContainer/ConnectionStatusLabel")
+ConnectionActionButton = NodePath("Home/BottomBar/MarginContainer/HBoxContainer/ConnectionActionButton")
 BuildingsTabContainer = NodePath("Home/ContentPanel/VSplitContainer/HSplitContainer/BuildingsTabContainer")
 BuildingTab = ExtResource("2_edplf")
 ShowWorkersButton = NodePath("Home/ContentPanel/ShowWorkersButton")
@@ -41,20 +41,9 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="TopBar" type="HBoxContainer" parent="Home"]
-custom_minimum_size = Vector2(0, 40)
+[node name="Padding" type="Control" parent="Home"]
+custom_minimum_size = Vector2(0, 5)
 layout_mode = 2
-
-[node name="ConnectionStatusLabel" type="Label" parent="Home/TopBar"]
-layout_mode = 2
-
-[node name="ConnectionActionButton" type="Button" parent="Home/TopBar"]
-layout_mode = 2
-
-[node name="Separator" type="Control" parent="Home/TopBar"]
-layout_mode = 2
-size_flags_horizontal = 3
-focus_mode = 1
 
 [node name="ContentPanel" type="Control" parent="Home"]
 layout_mode = 2
@@ -156,28 +145,45 @@ rotation = -1.5708
 pivot_offset = Vector2(95, 40)
 text = "Workers ^"
 
-[node name="BottomBar" type="HBoxContainer" parent="Home"]
-custom_minimum_size = Vector2(0, 40)
-layout_mode = 2
-
-[node name="Panel" type="Panel" parent="Home/BottomBar"]
+[node name="BottomBar" type="Panel" parent="Home"]
+custom_minimum_size = Vector2(0, 35)
 layout_mode = 2
 size_flags_horizontal = 3
 focus_mode = 1
 
-[node name="ServerLogsButton" type="Button" parent="Home/BottomBar/Panel"]
+[node name="MarginContainer" type="MarginContainer" parent="Home/BottomBar"]
 layout_mode = 1
-anchors_preset = 4
-anchor_top = 0.5
-anchor_bottom = 0.5
-offset_left = 5.0
-offset_top = -15.0
-offset_right = 90.0
-offset_bottom = 16.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_right = 5
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Home/BottomBar/MarginContainer"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+
+[node name="ServerLogsButton" type="Button" parent="Home/BottomBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
 toggle_mode = true
 text = "Server Logs"
 flat = true
+
+[node name="Separator" type="Control" parent="Home/BottomBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+
+[node name="ConnectionStatusLabel" type="Label" parent="Home/BottomBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ConnectionActionButton" type="Button" parent="Home/BottomBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 4
 
 [node name="LoadingBarrier" type="Panel" parent="." node_paths=PackedStringArray("LoadingMessage")]
 visible = false
@@ -394,14 +400,14 @@ layout_mode = 2
 layout_mode = 2
 text = "Cancel"
 
-[connection signal="pressed" from="Home/TopBar/ConnectionActionButton" to="." method="OnConnectionActionButtonPressed"]
 [connection signal="pressed" from="Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer/HideWorkersButton" to="." method="OnWorkersPanelToggled" binds= [false]]
 [connection signal="item_clicked" from="Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer/OnlineWorkersList" to="." method="OnOnlineWorkerClicked"]
 [connection signal="index_pressed" from="Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer/OnlineWorkersList/OnlineWorkerPopupMenu" to="." method="OnOnlineWorkerActionPressed"]
 [connection signal="item_clicked" from="Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer/OfflineWorkersList" to="." method="OnOfflineWorkerClicked"]
 [connection signal="index_pressed" from="Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer/OfflineWorkersList/OfflineWorkerPopupMenu" to="." method="OnOfflineWorkerActionPressed"]
 [connection signal="pressed" from="Home/ContentPanel/ShowWorkersButton" to="." method="OnWorkersPanelToggled" binds= [true]]
-[connection signal="toggled" from="Home/BottomBar/Panel/ServerLogsButton" to="." method="OnServerLogsButtonToggled"]
+[connection signal="toggled" from="Home/BottomBar/MarginContainer/HBoxContainer/ServerLogsButton" to="." method="OnServerLogsButtonToggled"]
+[connection signal="pressed" from="Home/BottomBar/MarginContainer/HBoxContainer/ConnectionActionButton" to="." method="OnConnectionActionButtonPressed"]
 [connection signal="LoginCredentialsSubmitted" from="PromptBarrier/LoginPrompt" to="." method="OnLoginCredentialsSubmitted"]
 [connection signal="toggled" from="PromptBarrier/LoginPrompt/VBoxContainer/MarginContainer/LoginForm/HBoxContainer/PasswordVisibilityButton" to="PromptBarrier/LoginPrompt" method="OnPasswordVisibilityButtonToggled"]
 [connection signal="pressed" from="PromptBarrier/LoginPrompt/VBoxContainer/MarginContainer/LoginForm/SubmitButton" to="PromptBarrier" method="HidePrompt"]

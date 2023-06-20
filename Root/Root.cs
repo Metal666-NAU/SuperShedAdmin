@@ -403,6 +403,29 @@ public partial class Root : Node {
 
 		});
 
+		Client.Listen(Client.IncomingMessage.NoRack, data => {
+
+			string rackId = data.ReadString();
+			string buildingId = data.ReadString();
+
+			BuildingTab.BuildingTab? buildingTab =
+				BuildingsTabContainer!.GetChildren()
+										.Cast<BuildingTab.BuildingTab>()
+										.FirstOrDefault(buildingTab =>
+															buildingTab.Building!.Id.Equals(buildingId));
+
+			if(buildingTab == null) {
+
+				GD.PushError("Failed to remove Rack: Building Tab not found!");
+
+				return;
+
+			}
+
+			buildingTab.RemoveRack(rackId);
+
+		});
+
 		Client.StartClient();
 
 	}

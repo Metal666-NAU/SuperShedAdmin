@@ -109,6 +109,8 @@ public static class Client {
 
 					if(!Listeners.ContainsKey(command)) {
 
+						GD.PushWarning($"No listener found for command {command}, skipping...");
+
 						return;
 
 					}
@@ -181,6 +183,9 @@ public static class Client {
 		Send((byte) OutgoingMessage.UpdateRack,
 				rackId, rackX, rackZ, rackWidth, rackLength, rackShelves, rackSpacing, rackRotation);
 
+	public static void SendDeleteRack(string rackId) =>
+		Send((byte) OutgoingMessage.DeleteRack, rackId);
+
 	private static void Send(byte command, params object[] data) {
 
 		using MemoryStream memoryStream = new();
@@ -231,7 +236,8 @@ public static class Client {
 		WorkerLoginCode,
 		WorkerAuthSuccess,
 		Building,
-		Rack
+		Rack,
+		NoRack
 
 	}
 
@@ -242,7 +248,8 @@ public static class Client {
 		RevokeWorkerAuth,
 		UpdateBuilding,
 		CreateRack,
-		UpdateRack
+		UpdateRack,
+		DeleteRack
 
 	}
 

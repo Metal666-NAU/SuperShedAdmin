@@ -120,4 +120,7 @@ public partial class BuildingModel : Node3D {
 
 	}
 
+	public virtual void RemoveRack(string rackId) =>
+		GetRack(SelectedRack)?.QueueFree();
+
 }

@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://b00xhsn4jlefc"]
+[gd_scene load_steps=14 format=3 uid="uid://b00xhsn4jlefc"]
 
 [ext_resource type="Script" path="res://Root/BuildingTab/BuildingTab.cs" id="1_jnq5f"]
 [ext_resource type="Script" path="res://Root/BuildingTab/BuildingModel.cs" id="2_33k60"]
@@ -41,7 +41,10 @@ size = Vector3(0.1, 2, 4)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ey1gd"]
 bg_color = Color(0, 0, 0, 0.294118)
 
-[node name="BuildingTab" type="Control" node_paths=PackedStringArray("PrimaryViewButton", "SecondaryViewButton", "PrimaryView", "BuildingModelViewport", "BuildingModel", "BuildingModelPopupMenu", "RackSettingsPanel", "RackXInput", "RackZInput", "RackWidthInput", "RackLengthInput", "RackShelvesInput", "RackSpacingInput", "RackRotationInput", "SaveRackSettingsButton", "SecondaryView", "BuildingWidthInput", "BuildingLengthInput", "BuildingHeightInput", "EditBuildingSizeButton", "SaveBuildingSizeButton", "CancelEditingBuildingSizeButton")]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_uuqwm"]
+bg_color = Color(0.85, 0.1275, 0.1275, 1)
+
+[node name="BuildingTab" type="Control" node_paths=PackedStringArray("PrimaryViewButton", "SecondaryViewButton", "PrimaryView", "BuildingModelViewport", "BuildingModel", "BuildingModelPopupMenu", "RackSettingsPanel", "RackXInput", "RackZInput", "RackWidthInput", "RackLengthInput", "RackShelvesInput", "RackSpacingInput", "RackRotationInput", "SaveRackSettingsButton", "DeleteRackButton", "SecondaryView", "BuildingWidthInput", "BuildingLengthInput", "BuildingHeightInput", "EditBuildingSizeButton", "SaveBuildingSizeButton", "CancelEditingBuildingSizeButton")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -65,6 +68,7 @@ RackShelvesInput = NodePath("VBoxContainer/PrimaryView/MarginContainer/RackSetti
 RackSpacingInput = NodePath("VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer/ShelveSettingsContainer/RackSpacingInput")
 RackRotationInput = NodePath("VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer/RackRotationInput")
 SaveRackSettingsButton = NodePath("VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer/HBoxContainer/SaveRackSettingsButton")
+DeleteRackButton = NodePath("VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer/DeleteRackButton")
 SecondaryView = NodePath("VBoxContainer/SecondaryView")
 BuildingWidthInput = NodePath("VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer/BuildingWidthInput")
 BuildingLengthInput = NodePath("VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer/BuildingLengthInput")
@@ -313,6 +317,18 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "Cancel"
 
+[node name="Separator" type="Control" parent="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 1
+
+[node name="DeleteRackButton" type="Button" parent="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.187708, 0.1275, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_styles/pressed = SubResource("StyleBoxFlat_uuqwm")
+text = "Delete :O"
+
 [node name="BuildingModelPopupMenu" type="PopupMenu" parent="VBoxContainer/PrimaryView/MarginContainer"]
 item_count = 1
 item_0/text = "+ Add Rack"
@@ -413,6 +429,7 @@ text = "Cancel"
 [connection signal="value_changed" from="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer/RackRotationInput" to="." method="OnRackSettingsChanged"]
 [connection signal="pressed" from="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer/HBoxContainer/SaveRackSettingsButton" to="." method="OnSaveRackSettingsButtonPressed"]
 [connection signal="pressed" from="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer/HBoxContainer/CancelEditingRackSettingsButton" to="." method="OnCancelEditingRackSettingsButtonPressed"]
+[connection signal="pressed" from="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer/DeleteRackButton" to="." method="OnDeleteRackButtonPressed"]
 [connection signal="index_pressed" from="VBoxContainer/PrimaryView/MarginContainer/BuildingModelPopupMenu" to="." method="OnBuildingModelActionPressed"]
 [connection signal="value_changed" from="VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer/BuildingWidthInput" to="." method="OnBuildingSizeChanged"]
 [connection signal="value_changed" from="VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer/BuildingLengthInput" to="." method="OnBuildingSizeChanged"]
