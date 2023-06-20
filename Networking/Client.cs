@@ -46,7 +46,8 @@ public static class Client {
 
 		WebsocketClient = new(new Uri("ws://localhost:8181/admin")) {
 
-			ReconnectTimeout = TimeSpan.FromMinutes(2)
+			ReconnectTimeout = TimeSpan.FromMinutes(2),
+			ErrorReconnectTimeout = TimeSpan.FromSeconds(10),
 
 		};
 
@@ -169,15 +170,16 @@ public static class Client {
 		Send((byte) OutgoingMessage.CreateRack,
 				buildingId);
 
-	public static void SendUpdateRack(string buildingId,
+	public static void SendUpdateRack(string rackId,
 										int rackX,
 										int rackZ,
 										int rackWidth,
 										int rackLength,
 										int rackShelves,
-										float rackSpacing) =>
+										float rackSpacing,
+										float rackRotation) =>
 		Send((byte) OutgoingMessage.UpdateRack,
-				buildingId, rackX, rackZ, rackWidth, rackLength, rackShelves, rackSpacing);
+				rackId, rackX, rackZ, rackWidth, rackLength, rackShelves, rackSpacing, rackRotation);
 
 	private static void Send(byte command, params object[] data) {
 

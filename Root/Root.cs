@@ -378,6 +378,7 @@ public partial class Root : Node {
 			int rackLength = data.ReadInt32();
 			int rackShelves = data.ReadInt32();
 			float rackSpacing = data.ReadSingle();
+			float rackRotation = data.ReadSingle();
 
 			BuildingTab.BuildingTab? buildingTab =
 				BuildingsTabContainer!.GetChildren()
@@ -387,6 +388,8 @@ public partial class Root : Node {
 
 			if(buildingTab == null) {
 
+				GD.PushError("Failed to create/update Rack: Building Tab not found!");
+
 				return;
 
 			}
@@ -395,7 +398,8 @@ public partial class Root : Node {
 									new(rackX, rackZ),
 									new(rackWidth, rackLength),
 									rackShelves,
-									rackSpacing);
+									rackSpacing,
+									rackRotation);
 
 		});
 

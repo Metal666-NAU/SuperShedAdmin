@@ -41,7 +41,7 @@ size = Vector3(0.1, 2, 4)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ey1gd"]
 bg_color = Color(0, 0, 0, 0.294118)
 
-[node name="BuildingTab" type="Control" node_paths=PackedStringArray("PrimaryViewButton", "SecondaryViewButton", "PrimaryView", "BuildingModelViewport", "BuildingModel", "BuildingModelPopupMenu", "SidePanel", "SecondaryView", "BuildingWidthInput", "BuildingLengthInput", "BuildingHeightInput", "EditBuildingSizeButton", "SaveBuildingSizeButton", "CancelEditingBuildingSizeButton")]
+[node name="BuildingTab" type="Control" node_paths=PackedStringArray("PrimaryViewButton", "SecondaryViewButton", "PrimaryView", "BuildingModelViewport", "BuildingModel", "BuildingModelPopupMenu", "RackSettingsPanel", "RackXInput", "RackZInput", "RackWidthInput", "RackLengthInput", "RackShelvesInput", "RackSpacingInput", "RackRotationInput", "SaveRackSettingsButton", "SecondaryView", "BuildingWidthInput", "BuildingLengthInput", "BuildingHeightInput", "EditBuildingSizeButton", "SaveBuildingSizeButton", "CancelEditingBuildingSizeButton")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -50,13 +50,21 @@ grow_horizontal = 2
 grow_vertical = 2
 focus_mode = 1
 script = ExtResource("1_jnq5f")
-PrimaryViewButton = NodePath("VBoxContainer/HBoxContainer/PrimaryViewButton")
-SecondaryViewButton = NodePath("VBoxContainer/HBoxContainer/SecondaryViewButton")
+PrimaryViewButton = NodePath("VBoxContainer/MarginContainer/HBoxContainer/PrimaryViewButton")
+SecondaryViewButton = NodePath("VBoxContainer/MarginContainer/HBoxContainer/SecondaryViewButton")
 PrimaryView = NodePath("VBoxContainer/PrimaryView")
 BuildingModelViewport = NodePath("VBoxContainer/PrimaryView/MarginContainer/BuildingModelViewportContainer/BuildingModelViewport")
 BuildingModel = NodePath("VBoxContainer/PrimaryView/MarginContainer/BuildingModelViewportContainer/BuildingModelViewport/BuildingModelRoot/BuildingModel")
 BuildingModelPopupMenu = NodePath("VBoxContainer/PrimaryView/MarginContainer/BuildingModelPopupMenu")
-SidePanel = NodePath("VBoxContainer/PrimaryView/MarginContainer/SidePanel")
+RackSettingsPanel = NodePath("VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel")
+RackXInput = NodePath("VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer/PositionInputsContainer/RackXInput")
+RackZInput = NodePath("VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer/PositionInputsContainer/RackZInput")
+RackWidthInput = NodePath("VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer/SizeInputsContainer/RackWidthInput")
+RackLengthInput = NodePath("VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer/SizeInputsContainer/RackLengthInput")
+RackShelvesInput = NodePath("VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer/ShelveSettingsContainer/RackShelvesInput")
+RackSpacingInput = NodePath("VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer/ShelveSettingsContainer/RackSpacingInput")
+RackRotationInput = NodePath("VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer/RackRotationInput")
+SaveRackSettingsButton = NodePath("VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer/HBoxContainer/SaveRackSettingsButton")
 SecondaryView = NodePath("VBoxContainer/SecondaryView")
 BuildingWidthInput = NodePath("VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer/BuildingWidthInput")
 BuildingLengthInput = NodePath("VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer/BuildingLengthInput")
@@ -73,16 +81,22 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/MarginContainer"]
 layout_mode = 2
 
-[node name="PrimaryViewButton" type="Button" parent="VBoxContainer/HBoxContainer"]
+[node name="PrimaryViewButton" type="Button" parent="VBoxContainer/MarginContainer/HBoxContainer"]
 layout_mode = 2
 toggle_mode = true
 button_pressed = true
 text = "3d View"
 
-[node name="SecondaryViewButton" type="Button" parent="VBoxContainer/HBoxContainer"]
+[node name="SecondaryViewButton" type="Button" parent="VBoxContainer/MarginContainer/HBoxContainer"]
 layout_mode = 2
 toggle_mode = true
 text = "Table View"
@@ -110,7 +124,7 @@ stretch = true
 [node name="BuildingModelViewport" type="SubViewport" parent="VBoxContainer/PrimaryView/MarginContainer/BuildingModelViewportContainer"]
 handle_input_locally = false
 physics_object_picking = true
-size = Vector2i(1142, 603)
+size = Vector2i(1142, 598)
 render_target_update_mode = 4
 
 [node name="BuildingModelRoot" type="Node3D" parent="VBoxContainer/PrimaryView/MarginContainer/BuildingModelViewportContainer/BuildingModelViewport"]
@@ -161,11 +175,143 @@ skeleton = NodePath("../EastWall")
 
 [node name="RackContainer" type="Node3D" parent="VBoxContainer/PrimaryView/MarginContainer/BuildingModelViewportContainer/BuildingModelViewport/BuildingModelRoot/BuildingModel"]
 
-[node name="SidePanel" type="Panel" parent="VBoxContainer/PrimaryView/MarginContainer"]
-custom_minimum_size = Vector2(200, 0)
+[node name="RackSettingsPanel" type="Panel" parent="VBoxContainer/PrimaryView/MarginContainer"]
+custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
 size_flags_horizontal = 0
 theme_override_styles/panel = SubResource("StyleBoxFlat_ey1gd")
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer"]
+layout_mode = 2
+focus_mode = 1
+
+[node name="Label" type="Label" parent="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Rack Editor"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HSeparator2" type="HSeparator" parent="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="PositionLabel" type="Label" parent="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Position:"
+
+[node name="PositionInputsContainer" type="HBoxContainer" parent="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="RackXInput" type="SpinBox" parent="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer/PositionInputsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = -500.0
+max_value = 500.0
+rounded = true
+prefix = "X:"
+suffix = "m"
+
+[node name="RackZInput" type="SpinBox" parent="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer/PositionInputsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = -500.0
+max_value = 500.0
+rounded = true
+prefix = "Z:"
+suffix = "m"
+
+[node name="SizeLabel" type="Label" parent="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Size:"
+
+[node name="SizeInputsContainer" type="HBoxContainer" parent="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="RackWidthInput" type="SpinBox" parent="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer/SizeInputsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 1.0
+value = 1.0
+rounded = true
+prefix = "Width:"
+suffix = "m"
+
+[node name="RackLengthInput" type="SpinBox" parent="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer/SizeInputsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 1.0
+value = 2.0
+rounded = true
+prefix = "Length:"
+suffix = "m"
+
+[node name="ShelvesLabel" type="Label" parent="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Shelves:"
+
+[node name="ShelveSettingsContainer" type="HBoxContainer" parent="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="RackShelvesInput" type="SpinBox" parent="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer/ShelveSettingsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 1.0
+max_value = 10.0
+value = 3.0
+rounded = true
+prefix = "Count:"
+
+[node name="RackSpacingInput" type="SpinBox" parent="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer/ShelveSettingsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.25
+max_value = 2.0
+step = 0.01
+value = 0.5
+prefix = "Spacing:"
+suffix = "m"
+custom_arrow_step = 0.25
+
+[node name="OtherLabel" type="Label" parent="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Other:"
+
+[node name="RackRotationInput" type="SpinBox" parent="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 360.0
+step = 0.1
+prefix = "Rotation:"
+suffix = "°"
+custom_arrow_step = 1.0
+
+[node name="HSeparator" type="HSeparator" parent="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="SaveRackSettingsButton" type="Button" parent="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+disabled = true
+text = "Save"
+
+[node name="CancelEditingRackSettingsButton" type="Button" parent="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Cancel"
 
 [node name="BuildingModelPopupMenu" type="PopupMenu" parent="VBoxContainer/PrimaryView/MarginContainer"]
 item_count = 1
@@ -255,9 +401,18 @@ visible = false
 layout_mode = 2
 text = "Cancel"
 
-[connection signal="pressed" from="VBoxContainer/HBoxContainer/PrimaryViewButton" to="." method="OnViewToggled" binds= [true]]
-[connection signal="pressed" from="VBoxContainer/HBoxContainer/SecondaryViewButton" to="." method="OnViewToggled" binds= [false]]
+[connection signal="pressed" from="VBoxContainer/MarginContainer/HBoxContainer/PrimaryViewButton" to="." method="OnViewToggled" binds= [true]]
+[connection signal="pressed" from="VBoxContainer/MarginContainer/HBoxContainer/SecondaryViewButton" to="." method="OnViewToggled" binds= [false]]
 [connection signal="gui_input" from="VBoxContainer/PrimaryView/MarginContainer/BuildingModelViewportContainer" to="." method="OnBuildingModelViewportContainerGuiInput"]
+[connection signal="value_changed" from="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer/PositionInputsContainer/RackXInput" to="." method="OnRackSettingsChanged"]
+[connection signal="value_changed" from="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer/PositionInputsContainer/RackZInput" to="." method="OnRackSettingsChanged"]
+[connection signal="value_changed" from="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer/SizeInputsContainer/RackWidthInput" to="." method="OnRackSettingsChanged"]
+[connection signal="value_changed" from="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer/SizeInputsContainer/RackLengthInput" to="." method="OnRackSettingsChanged"]
+[connection signal="value_changed" from="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer/ShelveSettingsContainer/RackShelvesInput" to="." method="OnRackSettingsChanged"]
+[connection signal="value_changed" from="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer/ShelveSettingsContainer/RackSpacingInput" to="." method="OnRackSettingsChanged"]
+[connection signal="value_changed" from="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer/RackRotationInput" to="." method="OnRackSettingsChanged"]
+[connection signal="pressed" from="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer/HBoxContainer/SaveRackSettingsButton" to="." method="OnSaveRackSettingsButtonPressed"]
+[connection signal="pressed" from="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer/HBoxContainer/CancelEditingRackSettingsButton" to="." method="OnCancelEditingRackSettingsButtonPressed"]
 [connection signal="index_pressed" from="VBoxContainer/PrimaryView/MarginContainer/BuildingModelPopupMenu" to="." method="OnBuildingModelActionPressed"]
 [connection signal="value_changed" from="VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer/BuildingWidthInput" to="." method="OnBuildingSizeChanged"]
 [connection signal="value_changed" from="VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer/BuildingLengthInput" to="." method="OnBuildingSizeChanged"]

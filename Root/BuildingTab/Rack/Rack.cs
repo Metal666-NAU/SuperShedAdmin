@@ -1,6 +1,5 @@
 using Godot;
 
-using System;
 using System.Collections.Generic;
 
 namespace SuperShedAdmin.Root.BuildingTab.Rack;
@@ -19,16 +18,15 @@ public partial class Rack : Node3D {
 	[Export]
 	public virtual Material? SelectedMaterial { get; set; }
 
+	[Signal]
+	public delegate void ClickedEventHandler();
+
 	public virtual string? Id { get; set; }
 	public virtual Vector2I Size { get; set; }
 	public virtual int Shelves { get; set; }
 	public virtual float Spacing { get; set; }
 
-	public event Action? Selected;
-
-	public virtual List<MeshInstance3D> Part { get; set; } = new();
-
-	public virtual bool IsSelected { get; set; }
+	public virtual List<MeshInstance3D> Parts { get; set; } = new();
 
 	public virtual void OnCollisionAreaInputEvent(Node camera,
 													InputEvent inputEvent,
@@ -54,27 +52,19 @@ public partial class Rack : Node3D {
 
 		}
 
-		IsSelected = !IsSelected;
-
-		foreach(MeshInstance3D part in Part) {
-
-			for(int i = 0; i < part.Mesh.GetSurfaceCount(); i++) {
-
-				part.Mesh.SurfaceSetMaterial(i, IsSelected ? SelectedMaterial : NormalMaterial);
-
-			}
-
-		}
-
-		if(IsSelected) {
-
-			Selected?.Invoke();
-
-		}
+		EmitSignal(SignalName.Clicked);
 
 	}
 
-	public override void _Ready() {
+	public virtual void UpdateVisuals(bool setSelected = false) {
+
+		Parts.Clear();
+
+		foreach(Node modelPart in ModelContainer!.GetChildren()) {
+
+			modelPart.QueueFree();
+
+		}
 
 		for(int i = 0; i < Shelves; i++) {
 
@@ -91,7 +81,7 @@ public partial class Rack : Node3D {
 
 			};
 
-			Part.Add(shelve);
+			Parts.Add(shelve);
 
 			ModelContainer!.AddChild(shelve);
 
@@ -116,7 +106,7 @@ public partial class Rack : Node3D {
 
 			};
 
-			Part.Add(leg);
+			Parts.Add(leg);
 
 			ModelContainer!.AddChild(leg);
 
@@ -134,6 +124,26 @@ public partial class Rack : Node3D {
 		(CollisionBox!.Shape as BoxShape3D)!.Size = new(Size.X, collisionBoxHeight, Size.Y);
 
 		CollisionBox.Position = new(0, collisionBoxHeight / 2, 0);
+
+		if(setSelected) {
+
+			SetSelected(true);
+
+		}
+
+	}
+
+	public virtual void SetSelected(bool isSelected) {
+
+		foreach(MeshInstance3D part in Parts) {
+
+			for(int i = 0; i < part.Mesh.GetSurfaceCount(); i++) {
+
+				part.Mesh.SurfaceSetMaterial(i, isSelected ? SelectedMaterial : NormalMaterial);
+
+			}
+
+		}
 
 	}
 

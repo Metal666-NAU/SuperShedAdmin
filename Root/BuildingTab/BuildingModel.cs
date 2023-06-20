@@ -27,6 +27,11 @@ public partial class BuildingModel : Node3D {
 	[Export]
 	public virtual PackedScene? Rack { get; set; }
 
+	public virtual string? SelectedRack { get; set; }
+
+	[Signal]
+	public delegate void RackSelectedEventHandler();
+
 	public virtual void SetSize(Vector3I size) {
 
 		const float wallThickness = 0.1f;
@@ -47,24 +52,71 @@ public partial class BuildingModel : Node3D {
 
 	}
 
-	public void UpdateRack(string rackId, Vector2I position, Vector2I size, int shelves, float spacing) {
+	public void UpdateRack(string rackId,
+							Vector2I position,
+							Vector2I size,
+							int shelves,
+							float spacing,
+							float rotation,
+							bool isSelected = false) {
 
-		Rack.Rack? rack = RackContainer!.GetChildren()
-										.Cast<Rack.Rack>()
-										.SingleOrDefault(rack => rack.Id!.Equals(rackId));
+		Rack.Rack? rack = GetRack(rackId);
 
-		rack?.QueueFree();
+		bool exists = rack != null;
 
-		rack = Rack!.Instantiate<Rack.Rack>();
+		if(!exists) {
 
-		rack.Id = rackId;
-		rack.Size = size;
+			rack = Rack!.Instantiate<Rack.Rack>();
+
+			rack.Id = rackId;
+
+			rack.Clicked += () => {
+
+				if(SelectedRack != null) {
+
+					return;
+
+				}
+
+				SelectedRack = rackId;
+
+				rack.SetSelected(true);
+
+				EmitSignal(SignalName.RackSelected);
+
+			};
+
+		}
+
+		rack!.Size = size;
 		rack.Shelves = shelves;
 		rack.Spacing = spacing;
 
-		RackContainer.AddChild(rack);
+		rack.UpdateVisuals(isSelected);
 
-		rack.Position = new(position.X, 0, position.X);
+		if(!exists) {
+
+			RackContainer!.AddChild(rack);
+
+		}
+
+		rack.Position = new(position.X, 0, -position.Y);
+		rack.Rotation = new();
+		rack.RotateY(Mathf.DegToRad(rotation));
+
+	}
+
+	public virtual Rack.Rack? GetRack(string? rackId = null) =>
+		RackContainer!.GetChildren()
+						.Cast<Rack.Rack>()
+						.SingleOrDefault(rack =>
+											rack.Id!.Equals(rackId ?? SelectedRack));
+
+	public virtual void DeselectRack() {
+
+		GetRack(SelectedRack)?.SetSelected(false);
+
+		SelectedRack = null;
 
 	}
 
