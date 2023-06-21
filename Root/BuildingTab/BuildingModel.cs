@@ -140,6 +140,12 @@ public partial class BuildingModel : Node3D {
 
 					case MouseButton.Left: {
 
+						if(SelectedRack != null || ObservedRack != null) {
+
+							break;
+
+						}
+
 						ObservedRack = rackId;
 
 						Vector3 rackRotation = rack.RotationDegrees - new Vector3(0, 90, 0);
@@ -191,9 +197,9 @@ public partial class BuildingModel : Node3D {
 
 					case MouseButton.Right: {
 
-						if(SelectedRack != null) {
+						if(SelectedRack != null || ObservedRack != null) {
 
-							return;
+							break;
 
 						}
 
