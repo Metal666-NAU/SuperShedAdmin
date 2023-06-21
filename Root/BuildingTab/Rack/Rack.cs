@@ -18,8 +18,11 @@ public partial class Rack : Node3D {
 	[Export]
 	public virtual Material? SelectedMaterial { get; set; }
 
+	[Export]
+	public virtual Material? HiddenMaterial { get; set; }
+
 	[Signal]
-	public delegate void ClickedEventHandler();
+	public delegate void ClickedEventHandler(long mouseButtonIndex);
 
 	public virtual string? Id { get; set; }
 	public virtual Vector2I Size { get; set; }
@@ -40,19 +43,13 @@ public partial class Rack : Node3D {
 
 		}
 
-		if(inputEventMouseButton.ButtonIndex != MouseButton.Left) {
-
-			return;
-
-		}
-
 		if(!inputEventMouseButton.Pressed) {
 
 			return;
 
 		}
 
-		EmitSignal(SignalName.Clicked);
+		EmitSignal(SignalName.Clicked, (long) inputEventMouseButton.ButtonIndex);
 
 	}
 
@@ -133,13 +130,19 @@ public partial class Rack : Node3D {
 
 	}
 
-	public virtual void SetSelected(bool isSelected) {
+	public virtual void SetSelected(bool isSelected) =>
+		ApplyMaterial((isSelected ? SelectedMaterial : NormalMaterial)!);
+
+	public virtual void SetHidden(bool isHidden) =>
+		ApplyMaterial((isHidden ? HiddenMaterial : NormalMaterial)!);
+
+	protected virtual void ApplyMaterial(Material material) {
 
 		foreach(MeshInstance3D part in Parts) {
 
 			for(int i = 0; i < part.Mesh.GetSurfaceCount(); i++) {
 
-				part.Mesh.SurfaceSetMaterial(i, isSelected ? SelectedMaterial : NormalMaterial);
+				part.Mesh.SurfaceSetMaterial(i, material);
 
 			}
 

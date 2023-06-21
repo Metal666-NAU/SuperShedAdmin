@@ -26,7 +26,7 @@ public partial class BuildingTab : Control {
 	public virtual BuildingModel? BuildingModel { get; set; }
 
 	[Export]
-	public virtual PopupMenu? BuildingModelPopupMenu { get; set; }
+	public virtual Button? StopObservingRackButton { get; set; }
 
 	[Export]
 	public virtual Panel? RackSettingsPanel { get; set; }
@@ -102,24 +102,6 @@ public partial class BuildingTab : Control {
 
 			switch(inputEventMouseButton.ButtonIndex) {
 
-				case MouseButton.Right: {
-
-					if(!inputEventMouseButton.Pressed) {
-
-						break;
-
-					}
-
-					BuildingModelPopupMenu!.Position =
-						new(Mathf.RoundToInt(inputEventMouseButton.GlobalPosition.X),
-									Mathf.RoundToInt(inputEventMouseButton.GlobalPosition.Y));
-
-					BuildingModelPopupMenu.Popup();
-
-					break;
-
-				}
-
 				case MouseButton.WheelUp: {
 
 					BuildingModel!.Zoom(true);
@@ -168,21 +150,8 @@ public partial class BuildingTab : Control {
 
 	}
 
-	public virtual void OnBuildingModelActionPressed(int index) {
-
-		switch(index) {
-
-			case 0: {
-
-				Client.SendCreateRack(Building!.Id);
-
-				break;
-
-			}
-
-		}
-
-	}
+	public virtual void OnCreateRackButtonPressed() =>
+		Client.SendCreateRack(Building!.Id);
 
 	public virtual void OnBuildingSizeChanged(float _) {
 
@@ -317,6 +286,14 @@ public partial class BuildingTab : Control {
 
 	}
 
+	public virtual void OnStopObservingRackButtonPressed() {
+
+		StopObservingRackButton!.Hide();
+
+		BuildingModel!.StopObservingRack();
+
+	}
+
 	public override void _Ready() {
 
 		ResetBuildingSizeInputs();
@@ -348,6 +325,8 @@ public partial class BuildingTab : Control {
 			RackRotationInput!.SetValueNoSignal(Rotation);
 
 		};
+
+		BuildingModel.RackObserved += () => StopObservingRackButton!.Show();
 
 	}
 

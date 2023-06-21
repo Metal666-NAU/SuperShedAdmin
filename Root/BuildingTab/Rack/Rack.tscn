@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://dmspiey8n3j2"]
+[gd_scene load_steps=6 format=3 uid="uid://dmspiey8n3j2"]
 
 [ext_resource type="Script" path="res://Root/BuildingTab/Rack/Rack.cs" id="1_8aoc4"]
 
@@ -20,6 +20,10 @@ subsurf_scatter_enabled = true
 subsurf_scatter_strength = 0.1
 refraction_enabled = true
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_f858w"]
+transparency = 1
+albedo_color = Color(1, 1, 1, 0)
+
 [sub_resource type="BoxShape3D" id="BoxShape3D_kuhf5"]
 
 [node name="Rack" type="Node3D" node_paths=PackedStringArray("ModelContainer", "CollisionBox")]
@@ -28,6 +32,7 @@ ModelContainer = NodePath("ModelContainer")
 CollisionBox = NodePath("CollisionArea/CollisionBox")
 NormalMaterial = SubResource("StandardMaterial3D_43mxi")
 SelectedMaterial = SubResource("StandardMaterial3D_61wv3")
+HiddenMaterial = SubResource("StandardMaterial3D_f858w")
 
 [node name="ModelContainer" type="Node3D" parent="."]
 

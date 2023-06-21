@@ -1,5 +1,6 @@
 using Godot;
 
+using System;
 using System.Linq;
 
 namespace SuperShedAdmin.Root.BuildingTab;
@@ -11,6 +12,15 @@ public partial class BuildingModel : Node3D {
 
 	[Export]
 	public virtual Node3D? CameraPivot { get; set; }
+
+	[Export]
+	public virtual Node3D? CameraDolly { get; set; }
+
+	[Export]
+	public virtual Node3D? CameraObserveOrigin { get; set; }
+
+	[Export]
+	public virtual Node3D? CameraObservePivot { get; set; }
 
 	[Export]
 	public virtual Camera3D? Camera { get; set; }
@@ -56,19 +66,22 @@ public partial class BuildingModel : Node3D {
 
 	public virtual string? SelectedRack { get; set; }
 
-	[Signal]
-	public delegate void RackSelectedEventHandler();
+	public virtual string? ObservedRack { get; set; }
+
+	public event Action? RackObserved;
+
+	public event Action? RackSelected;
 
 	public override void _Ready() {
 
-		TargetCameraZoom = Camera!.Position.Z;
+		TargetCameraZoom = CameraDolly!.Position.Z;
 
 	}
 
 	public override void _Process(double delta) {
 
-		Camera!.Position =
-			Camera.Position.Lerp(new Vector3(0, 0, TargetCameraZoom),
+		CameraDolly!.Position =
+			CameraDolly.Position.Lerp(new Vector3(0, 0, TargetCameraZoom),
 									CameraZoomSmoothing);
 
 		CameraOrigin!.Position =
@@ -115,19 +128,86 @@ public partial class BuildingModel : Node3D {
 
 			rack.Id = rackId;
 
-			rack.Clicked += () => {
+			rack.Clicked += (long mouseButtonIndex) => {
 
-				if(SelectedRack != null) {
+				if(ObservedRack != null) {
 
 					return;
 
 				}
 
-				SelectedRack = rackId;
+				switch((MouseButton) mouseButtonIndex) {
 
-				rack.SetSelected(true);
+					case MouseButton.Left: {
 
-				EmitSignal(SignalName.RackSelected);
+						ObservedRack = rackId;
+
+						Vector3 rackRotation = rack.RotationDegrees - new Vector3(0, 90, 0);
+
+						float rackHeight = rack.Shelves * rack.Spacing;
+						float rackWidth = rack.Size.X;
+						float rackLength = rack.Size.Y;
+
+						float cameraTilt = Mathf.DegToRad(-15);
+
+						CameraObserveOrigin!.Position = rack.Position;
+						CameraObserveOrigin.RotationDegrees = rackRotation;
+
+						Camera!.KeepAspect = (rackHeight + rackWidth) > rackLength ?
+												Camera3D.KeepAspectEnum.Height :
+												Camera3D.KeepAspectEnum.Width;
+
+						CameraObservePivot!.Position
+							= new(0,
+										rackHeight,
+										rackHeight / 2 / Mathf.Tan(Mathf.Abs(cameraTilt)));
+
+						CameraObservePivot.RotateX(cameraTilt);
+
+						Camera.Projection = Camera3D.ProjectionType.Orthogonal;
+
+						Camera.Size = Mathf.Max(rackLength, rackHeight) + 1;
+
+						CameraDolly!.RemoveChild(Camera);
+						CameraObservePivot.AddChild(Camera);
+
+						foreach(Rack.Rack otherRack in RackContainer!.GetChildren().Cast<Rack.Rack>()) {
+
+							if(otherRack == rack) {
+
+								continue;
+
+							}
+
+							otherRack.SetHidden(true);
+
+						}
+
+						RackObserved?.Invoke();
+
+						break;
+
+					}
+
+					case MouseButton.Right: {
+
+						if(SelectedRack != null) {
+
+							return;
+
+						}
+
+						SelectedRack = rackId;
+
+						rack.SetSelected(true);
+
+						RackSelected?.Invoke();
+
+						break;
+
+					}
+
+				}
 
 			};
 
@@ -170,16 +250,37 @@ public partial class BuildingModel : Node3D {
 
 	public virtual void Zoom(bool forward) {
 
+		if(ObservedRack != null) {
+
+			return;
+
+		}
+
 		TargetCameraZoom += (forward ? -1 : 1) * CameraZoomSpeed;
 
 		TargetCameraZoom = Mathf.Clamp(TargetCameraZoom, CameraZoomSpeed, 100);
 
 	}
 
-	public virtual void ToggleGrabCamera() =>
+	public virtual void ToggleGrabCamera() {
+
+		if(ObservedRack != null) {
+
+			return;
+
+		}
+
 		IsMovingCamera = !IsMovingCamera;
 
+	}
+
 	public virtual void MoveCamera(Vector2 relativePosition) {
+
+		if(ObservedRack != null) {
+
+			return;
+
+		}
 
 		if(!IsMovingCamera) {
 
@@ -191,6 +292,26 @@ public partial class BuildingModel : Node3D {
 			new Vector3(relativePosition.X, 0, relativePosition.Y)
 			* CameraMoveSpeed
 			* Mathf.Sqrt(TargetCameraZoom);
+
+	}
+
+	public virtual void StopObservingRack() {
+
+		ObservedRack = null;
+
+		Camera!.Projection = Camera3D.ProjectionType.Perspective;
+		Camera.KeepAspect = Camera3D.KeepAspectEnum.Height;
+
+		CameraObservePivot!.RemoveChild(Camera);
+		CameraDolly!.AddChild(Camera);
+
+		CameraObservePivot.RotationDegrees = new();
+
+		foreach(Rack.Rack rack in RackContainer!.GetChildren().Cast<Rack.Rack>()) {
+
+			rack.SetHidden(false);
+
+		}
 
 	}
 
