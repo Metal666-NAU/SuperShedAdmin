@@ -51,7 +51,7 @@ content_margin_right = 15.0
 content_margin_bottom = 2.0
 bg_color = Color(0, 0, 0, 0.27451)
 
-[node name="BuildingTab" type="Control" node_paths=PackedStringArray("PrimaryViewButton", "SecondaryViewButton", "PrimaryView", "BuildingModelViewport", "BuildingModel", "StopObservingRackButton", "RackSettingsPanel", "RackXInput", "RackZInput", "RackWidthInput", "RackLengthInput", "RackShelvesInput", "RackSpacingInput", "RackRotationInput", "SaveRackSettingsButton", "DeleteRackButton", "SecondaryView", "GroupByPopup", "ProductsTree", "BuildingWidthInput", "BuildingLengthInput", "BuildingHeightInput", "EditBuildingSizeButton", "SaveBuildingSizeButton", "CancelEditingBuildingSizeButton")]
+[node name="BuildingTab" type="Control" node_paths=PackedStringArray("PrimaryViewButton", "SecondaryViewButton", "PrimaryView", "BuildingModelViewport", "BuildingModel", "StopObservingRackButton", "RackSettingsPanel", "RackXInput", "RackZInput", "RackWidthInput", "RackLengthInput", "RackShelvesInput", "RackSpacingInput", "RackRotationInput", "SaveRackSettingsButton", "DeleteRackButton", "SecondaryView", "GroupByPopup", "ProductsTree", "ProductQRCodeTexture", "BuildingWidthInput", "BuildingLengthInput", "BuildingHeightInput", "EditBuildingSizeButton", "SaveBuildingSizeButton", "CancelEditingBuildingSizeButton")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -78,7 +78,8 @@ SaveRackSettingsButton = NodePath("VBoxContainer/PrimaryView/MarginContainer/Rac
 DeleteRackButton = NodePath("VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer/DeleteRackButton")
 SecondaryView = NodePath("VBoxContainer/SecondaryView")
 GroupByPopup = NodePath("VBoxContainer/SecondaryView/VBoxContainer/MenuBar/GroupBy")
-ProductsTree = NodePath("VBoxContainer/SecondaryView/VBoxContainer/ProductsTree")
+ProductsTree = NodePath("VBoxContainer/SecondaryView/VBoxContainer/HSplitContainer/ProductsTree")
+ProductQRCodeTexture = NodePath("VBoxContainer/SecondaryView/VBoxContainer/HSplitContainer/ProductQRCodeTexture")
 BuildingWidthInput = NodePath("VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer/BuildingWidthInput")
 BuildingLengthInput = NodePath("VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer/BuildingLengthInput")
 BuildingHeightInput = NodePath("VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer/BuildingHeightInput")
@@ -411,12 +412,24 @@ item_1/text = "Manufacturer"
 item_1/checkable = 2
 item_1/id = 1
 
-[node name="ProductsTree" type="Tree" parent="VBoxContainer/SecondaryView/VBoxContainer"]
+[node name="HSplitContainer" type="HSplitContainer" parent="VBoxContainer/SecondaryView/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
-columns = 4
+
+[node name="ProductsTree" type="Tree" parent="VBoxContainer/SecondaryView/VBoxContainer/HSplitContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+columns = 5
 column_titles_visible = true
 hide_root = true
+
+[node name="ProductQRCodeTexture" type="TextureRect" parent="VBoxContainer/SecondaryView/VBoxContainer/HSplitContainer"]
+visible = false
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+expand_mode = 4
+stretch_mode = 5
 
 [node name="Panel" type="Panel" parent="VBoxContainer/SecondaryView/VBoxContainer"]
 custom_minimum_size = Vector2(0, 35)

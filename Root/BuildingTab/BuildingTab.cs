@@ -1,5 +1,7 @@
 using Godot;
 
+using Net.Codecrete.QrCodeGenerator;
+
 using SuperShedAdmin.Networking;
 
 using System.Collections.Generic;
@@ -67,6 +69,9 @@ public partial class BuildingTab : Control {
 
 	[Export]
 	public virtual Tree? ProductsTree { get; set; }
+
+	[Export]
+	public virtual TextureRect? ProductQRCodeTexture { get; set; }
 
 	[Export]
 	public virtual SpinBox? BuildingWidthInput { get; set; }
@@ -469,6 +474,7 @@ public partial class BuildingTab : Control {
 
 		ProductsTree.SetColumnTitle(2, "Size");
 		ProductsTree.SetColumnTitle(3, "Location");
+		ProductsTree.SetColumnTitle(4, "QR Code");
 
 		for(int i = 0; i < ProductsTree.Columns; i++) {
 
@@ -561,7 +567,55 @@ public partial class BuildingTab : Control {
 
 			treeItem.SetText(3, $"Rack {rackPosition.X}:{rackPosition.Y}, Shelf {productPosition.X}, Spot {productPosition.Y}");
 
+			treeItem.SetText(4, "Show");
+
+			treeItem.SetMeta("productId", product.Key);
+
 		}
+
+		ProductsTree.CellSelected += () => {
+
+			TreeItem selectedItem = ProductsTree.GetSelected();
+
+			if(groupItems.Contains(selectedItem)) {
+
+				ProductQRCodeTexture!.Hide();
+
+				return;
+
+			}
+
+			if(ProductsTree.GetSelectedColumn() != 4) {
+
+				return;
+
+			}
+
+			QrCode qrCode = QrCode.EncodeText(selectedItem.GetMeta("productId").AsString(), QrCode.Ecc.High);
+
+			int size = qrCode.Size;
+
+			Image qrCodeImage = Image.Create(size, size, false, Image.Format.L8);
+
+			for(int i = 0; i < size; i++) {
+
+				for(int j = 0; j < size; j++) {
+
+					qrCodeImage.SetPixel(i, j, qrCode.GetModule(i, j) ? Colors.Black : Colors.White);
+
+				}
+
+			}
+
+			ProductQRCodeTexture!.Texture = ImageTexture.CreateFromImage(qrCodeImage);
+
+			ProductQRCodeTexture.TextureFilter = TextureFilterEnum.Nearest;
+
+			ProductQRCodeTexture.Show();
+
+		};
+
+		ProductsTree.EmptyClicked += (position, mouseButtonIndex) => ProductQRCodeTexture!.Hide();
 
 	}
 
