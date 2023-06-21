@@ -426,6 +426,40 @@ public partial class Root : Node {
 
 		});
 
+		Client.Listen(Client.IncomingMessage.Product, data => {
+
+			string productId = data.ReadString();
+			float productWidth = data.ReadSingle();
+			float productLength = data.ReadSingle();
+			float productHeight = data.ReadSingle();
+			string productManufacturer = data.ReadString();
+			string rackId = data.ReadString();
+			int rackShelf = data.ReadInt32();
+			int rackSpot = data.ReadInt32();
+			string buildingId = data.ReadString();
+
+			BuildingTab.BuildingTab? buildingTab =
+				BuildingsTabContainer!.GetChildren()
+										.Cast<BuildingTab.BuildingTab>()
+										.FirstOrDefault(buildingTab =>
+															buildingTab.Building!.Id.Equals(buildingId));
+
+			if(buildingTab == null) {
+
+				GD.PushError("Failed to create/update Product: Building Tab not found!");
+
+				return;
+
+			}
+
+			buildingTab.UpdateProduct(productId,
+										new(productLength, productHeight, productWidth),
+										productManufacturer,
+										rackId,
+										new(rackShelf, rackSpot));
+
+		});
+
 		Client.StartClient();
 
 	}

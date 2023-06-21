@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://dmspiey8n3j2"]
+[gd_scene load_steps=8 format=3 uid="uid://dmspiey8n3j2"]
 
 [ext_resource type="Script" path="res://Root/BuildingTab/Rack/Rack.cs" id="1_8aoc4"]
 
@@ -24,17 +24,28 @@ refraction_enabled = true
 transparency = 1
 albedo_color = Color(1, 1, 1, 0)
 
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_kmiop"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8kx27"]
+albedo_color = Color(0.568627, 0.392157, 0.262745, 1)
+metallic_specular = 0.0
+roughness_texture = SubResource("NoiseTexture2D_kmiop")
+
 [sub_resource type="BoxShape3D" id="BoxShape3D_kuhf5"]
 
-[node name="Rack" type="Node3D" node_paths=PackedStringArray("ModelContainer", "CollisionBox")]
+[node name="Rack" type="Node3D" node_paths=PackedStringArray("ModelContainer", "ProductsContainer", "CollisionBox")]
 script = ExtResource("1_8aoc4")
 ModelContainer = NodePath("ModelContainer")
+ProductsContainer = NodePath("ProductsContainer")
 CollisionBox = NodePath("CollisionArea/CollisionBox")
 NormalMaterial = SubResource("StandardMaterial3D_43mxi")
 SelectedMaterial = SubResource("StandardMaterial3D_61wv3")
 HiddenMaterial = SubResource("StandardMaterial3D_f858w")
+ProductMaterial = SubResource("StandardMaterial3D_8kx27")
 
 [node name="ModelContainer" type="Node3D" parent="."]
+
+[node name="ProductsContainer" type="Node3D" parent="."]
 
 [node name="CollisionArea" type="Area3D" parent="."]
 

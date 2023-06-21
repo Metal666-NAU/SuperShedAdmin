@@ -237,7 +237,8 @@ public static class Client {
 		WorkerAuthSuccess,
 		Building,
 		Rack,
-		NoRack
+		NoRack,
+		Product
 
 	}
 

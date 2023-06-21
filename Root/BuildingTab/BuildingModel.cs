@@ -110,7 +110,7 @@ public partial class BuildingModel : Node3D {
 
 	}
 
-	public void UpdateRack(string rackId,
+	public Rack.Rack UpdateRack(string rackId,
 							Vector2I position,
 							Vector2I size,
 							int shelves,
@@ -234,6 +234,28 @@ public partial class BuildingModel : Node3D {
 		rack.Position = new(position.X, 0, -position.Y);
 		rack.Rotation = new();
 		rack.RotateY(Mathf.DegToRad(rotation));
+
+		return rack;
+
+	}
+
+	public void UpdateProduct(string productId,
+								string rackId,
+								Vector3 size,
+								Vector2I position,
+								string manufacturer) {
+
+		Rack.Rack? rack = GetRack(rackId);
+
+		if(rack == null) {
+
+			GD.PushError("Failed to update a Product: Rack was not found!");
+
+			return;
+
+		}
+
+		rack.UpdateProduct(productId, size, position);
 
 	}
 

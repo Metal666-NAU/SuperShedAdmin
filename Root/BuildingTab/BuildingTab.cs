@@ -3,6 +3,7 @@ using Godot;
 using SuperShedAdmin.Networking;
 
 using System.Collections.Generic;
+using System.Linq;
 
 using static SuperShedAdmin.Root.Root;
 
@@ -82,6 +83,8 @@ public partial class BuildingTab : Control {
 	public virtual Building? Building { get; set; }
 
 	public virtual Dictionary<string, (Vector2I Position, Vector2I Size, int Shelves, float Spacing, float Rotation)> Racks { get; set; }
+		= new();
+	public virtual Dictionary<string, (Vector3 Size, string Manufacturer, string RackId, Vector2I Position)> Products { get; set; }
 		= new();
 
 	public virtual bool ReallyWantsToDeleteRack { get; set; }
@@ -256,13 +259,20 @@ public partial class BuildingTab : Control {
 		(Vector2I Position, Vector2I Size, int Shelves, float Spacing, float Rotation)
 			= Racks[BuildingModel!.SelectedRack!];
 
-		BuildingModel.UpdateRack(BuildingModel.SelectedRack!,
-									Position,
-									Size,
-									Shelves,
-									Spacing,
-									Rotation,
-									false);
+		Rack.Rack rack =
+			BuildingModel.UpdateRack(BuildingModel.SelectedRack!,
+										Position,
+										Size,
+										Shelves,
+										Spacing,
+										Rotation,
+										false);
+
+		foreach(KeyValuePair<string, (Vector3 Size, string Manufacturer, string RackId, Vector2I Position)> product in Products.Where(product => product.Value.RackId.Equals(BuildingModel.SelectedRack))) {
+
+			rack.UpdateProduct(product.Key, product.Value.Size, product.Value.Position);
+
+		}
 
 		BuildingModel.SelectedRack = null;
 
@@ -362,7 +372,29 @@ public partial class BuildingTab : Control {
 
 		Racks[rackId] = (position, size, shelves, spacing, rotation);
 
-		BuildingModel!.UpdateRack(rackId, position, size, shelves, spacing, rotation);
+		Rack.Rack rack = BuildingModel!.UpdateRack(rackId, position, size, shelves, spacing, rotation);
+
+		foreach(KeyValuePair<string, (Vector3 Size, string Manufacturer, string RackId, Vector2I Position)> product in Products.Where(product => product.Value.RackId.Equals(rackId))) {
+
+			rack.UpdateProduct(product.Key, product.Value.Size, product.Value.Position);
+
+		}
+
+	}
+
+	public virtual void UpdateProduct(string productId,
+										Vector3 productSize,
+										string productManufacturer,
+										string rackId,
+										Vector2I productPosition) {
+
+		Products[productId] = (productSize, productManufacturer, rackId, productPosition);
+
+		BuildingModel!.UpdateProduct(productId,
+										rackId,
+										productSize,
+										productPosition,
+										productManufacturer);
 
 	}
 
