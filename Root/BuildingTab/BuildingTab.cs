@@ -98,28 +98,73 @@ public partial class BuildingTab : Control {
 
 	public virtual void OnBuildingModelViewportContainerGuiInput(InputEvent inputEvent) {
 
-		if(inputEvent is not InputEventMouseButton inputEventMouseButton) {
+		if(inputEvent is InputEventMouseButton inputEventMouseButton) {
 
-			return;
+			switch(inputEventMouseButton.ButtonIndex) {
+
+				case MouseButton.Right: {
+
+					if(!inputEventMouseButton.Pressed) {
+
+						break;
+
+					}
+
+					BuildingModelPopupMenu!.Position =
+						new(Mathf.RoundToInt(inputEventMouseButton.GlobalPosition.X),
+									Mathf.RoundToInt(inputEventMouseButton.GlobalPosition.Y));
+
+					BuildingModelPopupMenu.Popup();
+
+					break;
+
+				}
+
+				case MouseButton.WheelUp: {
+
+					BuildingModel!.Zoom(true);
+
+					break;
+
+				}
+
+				case MouseButton.WheelDown: {
+
+					BuildingModel!.Zoom(false);
+
+					break;
+
+				}
+
+				case MouseButton.Middle: {
+
+					BuildingModel!.ToggleGrabCamera();
+
+					if(inputEventMouseButton.Pressed) {
+
+						Input.MouseMode = Input.MouseModeEnum.Captured;
+
+					}
+
+					else {
+
+						Input.MouseMode = Input.MouseModeEnum.Visible;
+
+					}
+
+					break;
+
+				}
+
+			}
 
 		}
 
-		if(inputEventMouseButton.ButtonIndex != MouseButton.Right) {
+		if(inputEvent is InputEventMouseMotion inputEventMouseMotion) {
 
-			return;
-
-		}
-
-		if(!inputEventMouseButton.Pressed) {
-
-			return;
+			BuildingModel!.MoveCamera(inputEventMouseMotion.Relative);
 
 		}
-
-		BuildingModelPopupMenu!.Position = new(Mathf.RoundToInt(inputEventMouseButton.GlobalPosition.X),
-														Mathf.RoundToInt(inputEventMouseButton.GlobalPosition.Y));
-
-		BuildingModelPopupMenu.Popup();
 
 	}
 

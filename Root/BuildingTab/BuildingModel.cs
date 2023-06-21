@@ -7,6 +7,15 @@ namespace SuperShedAdmin.Root.BuildingTab;
 public partial class BuildingModel : Node3D {
 
 	[Export]
+	public virtual Node3D? CameraOrigin { get; set; }
+
+	[Export]
+	public virtual Node3D? CameraPivot { get; set; }
+
+	[Export]
+	public virtual Camera3D? Camera { get; set; }
+
+	[Export]
 	public virtual MeshInstance3D? Floor { get; set; }
 
 	[Export]
@@ -27,10 +36,46 @@ public partial class BuildingModel : Node3D {
 	[Export]
 	public virtual PackedScene? Rack { get; set; }
 
+	[Export]
+	public virtual float CameraZoomSpeed { get; set; }
+
+	[Export]
+	public virtual float CameraZoomSmoothing { get; set; }
+
+	[Export]
+	public virtual float CameraMoveSpeed { get; set; }
+
+	[Export]
+	public virtual float CameraMoveSmoothing { get; set; }
+
+	public virtual float TargetCameraZoom { get; set; }
+
+	public virtual Vector3 TargetCameraPosition { get; set; }
+
+	public virtual bool IsMovingCamera { get; set; }
+
 	public virtual string? SelectedRack { get; set; }
 
 	[Signal]
 	public delegate void RackSelectedEventHandler();
+
+	public override void _Ready() {
+
+		TargetCameraZoom = CameraPivot!.Position.Z;
+
+	}
+
+	public override void _Process(double delta) {
+
+		Camera!.Position =
+			Camera.Position.Lerp(new Vector3(0, 0, TargetCameraZoom),
+									CameraZoomSmoothing);
+
+		CameraOrigin!.Position =
+			CameraOrigin.Position.Lerp(TargetCameraPosition,
+										CameraMoveSmoothing);
+
+	}
 
 	public virtual void SetSize(Vector3I size) {
 
@@ -122,5 +167,31 @@ public partial class BuildingModel : Node3D {
 
 	public virtual void RemoveRack(string rackId) =>
 		GetRack(SelectedRack)?.QueueFree();
+
+	public virtual void Zoom(bool forward) {
+
+		TargetCameraZoom += (forward ? -1 : 1) * CameraZoomSpeed;
+
+		TargetCameraZoom = Mathf.Clamp(TargetCameraZoom, 0.1f, 100);
+
+	}
+
+	public virtual void ToggleGrabCamera() =>
+		IsMovingCamera = !IsMovingCamera;
+
+	public virtual void MoveCamera(Vector2 relativePosition) {
+
+		if(!IsMovingCamera) {
+
+			return;
+
+		}
+
+		TargetCameraPosition -=
+			new Vector3(relativePosition.X, 0, relativePosition.Y)
+			* CameraMoveSpeed
+			* Mathf.Sqrt(TargetCameraZoom);
+
+	}
 
 }
