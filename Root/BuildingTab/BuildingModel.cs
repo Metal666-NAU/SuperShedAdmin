@@ -242,8 +242,7 @@ public partial class BuildingModel : Node3D {
 	public void UpdateProduct(string productId,
 								string rackId,
 								Vector3 size,
-								Vector2I position,
-								string manufacturer) {
+								Vector2I position) {
 
 		Rack.Rack? rack = GetRack(rackId);
 

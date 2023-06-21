@@ -63,6 +63,12 @@ public partial class BuildingTab : Control {
 	public virtual Panel? SecondaryView { get; set; }
 
 	[Export]
+	public virtual PopupMenu? GroupByPopup { get; set; }
+
+	[Export]
+	public virtual Tree? ProductsTree { get; set; }
+
+	[Export]
 	public virtual SpinBox? BuildingWidthInput { get; set; }
 
 	[Export]
@@ -84,8 +90,10 @@ public partial class BuildingTab : Control {
 
 	public virtual Dictionary<string, (Vector2I Position, Vector2I Size, int Shelves, float Spacing, float Rotation)> Racks { get; set; }
 		= new();
-	public virtual Dictionary<string, (Vector3 Size, string Manufacturer, string RackId, Vector2I Position)> Products { get; set; }
+	public virtual Dictionary<string, (Vector3 Size, string Manufacturer, string RackId, Vector2I Position, string Name, string Category)> Products { get; set; }
 		= new();
+
+	public virtual ProductGroups GroupProductsBy { get; set; }
 
 	public virtual bool ReallyWantsToDeleteRack { get; set; }
 
@@ -183,6 +191,8 @@ public partial class BuildingTab : Control {
 
 		ToggleBuildingSizeEditing(false);
 
+		Building = Building with { Size = buildingSize };
+
 		BuildingModel!.SetSize(buildingSize);
 
 	}
@@ -268,7 +278,7 @@ public partial class BuildingTab : Control {
 										Rotation,
 										false);
 
-		foreach(KeyValuePair<string, (Vector3 Size, string Manufacturer, string RackId, Vector2I Position)> product in Products.Where(product => product.Value.RackId.Equals(BuildingModel.SelectedRack))) {
+		foreach(KeyValuePair<string, (Vector3 Size, string Manufacturer, string RackId, Vector2I Position, string Name, string Category)> product in Products.Where(product => product.Value.RackId.Equals(BuildingModel.SelectedRack))) {
 
 			rack.UpdateProduct(product.Key, product.Value.Size, product.Value.Position);
 
@@ -301,6 +311,24 @@ public partial class BuildingTab : Control {
 		StopObservingRackButton!.Hide();
 
 		BuildingModel!.StopObservingRack();
+
+	}
+
+	public virtual void OnProductsGroupingChanged(int index) {
+
+		GroupProductsBy = (ProductGroups) index;
+
+		UpdateProductsTree();
+
+		for(int i = 0; i < GroupByPopup!.ItemCount; i++) {
+
+			GroupByPopup.SetItemChecked(i, false);
+
+		}
+
+		GroupByPopup.SetItemChecked(index, true);
+
+		UpdateGroupByPopupName();
 
 	}
 
@@ -338,6 +366,8 @@ public partial class BuildingTab : Control {
 
 		BuildingModel.RackObserved += () => StopObservingRackButton!.Show();
 
+		UpdateGroupByPopupName();
+
 	}
 
 	public virtual void ToggleBuildingSizeEditing(bool editing) {
@@ -374,7 +404,7 @@ public partial class BuildingTab : Control {
 
 		Rack.Rack rack = BuildingModel!.UpdateRack(rackId, position, size, shelves, spacing, rotation);
 
-		foreach(KeyValuePair<string, (Vector3 Size, string Manufacturer, string RackId, Vector2I Position)> product in Products.Where(product => product.Value.RackId.Equals(rackId))) {
+		foreach(KeyValuePair<string, (Vector3 Size, string Manufacturer, string RackId, Vector2I Position, string Name, string Category)> product in Products.Where(product => product.Value.RackId.Equals(rackId))) {
 
 			rack.UpdateProduct(product.Key, product.Value.Size, product.Value.Position);
 
@@ -386,15 +416,18 @@ public partial class BuildingTab : Control {
 										Vector3 productSize,
 										string productManufacturer,
 										string rackId,
-										Vector2I productPosition) {
+										Vector2I productPosition,
+										string productName,
+										string productCategory) {
 
-		Products[productId] = (productSize, productManufacturer, rackId, productPosition);
+		Products[productId] = (productSize, productManufacturer, rackId, productPosition, productName, productCategory);
 
 		BuildingModel!.UpdateProduct(productId,
 										rackId,
 										productSize,
-										productPosition,
-										productManufacturer);
+										productPosition);
+
+		UpdateProductsTree();
 
 	}
 
@@ -403,6 +436,142 @@ public partial class BuildingTab : Control {
 		Racks.Remove(rackId);
 
 		BuildingModel!.RemoveRack(rackId);
+
+	}
+
+	public virtual void UpdateProductsTree() {
+
+		ProductsTree!.Clear();
+
+		ProductsTree.CreateItem();
+
+		ProductsTree.SetColumnTitle(0, "Name");
+
+		switch(GroupProductsBy) {
+
+			case ProductGroups.Category: {
+
+				ProductsTree.SetColumnTitle(1, "Manufacturer");
+
+				break;
+
+			}
+
+			case ProductGroups.Manufacturer: {
+
+				ProductsTree.SetColumnTitle(1, "Category");
+
+				break;
+
+			}
+
+		}
+
+		ProductsTree.SetColumnTitle(2, "Size");
+		ProductsTree.SetColumnTitle(3, "Location");
+
+		for(int i = 0; i < ProductsTree.Columns; i++) {
+
+			ProductsTree.SetColumnTitleAlignment(i, HorizontalAlignment.Left);
+
+		}
+
+		List<TreeItem> groupItems = Products.Values.Select(productInfo => {
+
+			switch(GroupProductsBy) {
+
+				case ProductGroups.Category: {
+
+					return productInfo.Category;
+
+				}
+
+				case ProductGroups.Manufacturer: {
+
+					return productInfo.Manufacturer;
+
+				}
+
+			}
+
+			return productInfo.Name;
+
+		}).Distinct().Select(group => {
+
+			TreeItem treeItem = ProductsTree.CreateItem();
+
+			treeItem.SetText(0, group);
+
+			return treeItem;
+
+		}).ToList();
+
+		foreach(KeyValuePair<string, (Vector3 Size, string Manufacturer, string RackId, Vector2I Position, string Name, string Category)> product in Products) {
+
+			TreeItem treeItem = ProductsTree.CreateItem(groupItems.Single(groupItem => {
+
+				switch(GroupProductsBy) {
+
+					case ProductGroups.Category: {
+
+						return groupItem.GetText(0).Equals(product.Value.Category);
+
+					}
+
+					case ProductGroups.Manufacturer: {
+
+						return groupItem.GetText(0).Equals(product.Value.Manufacturer);
+
+					}
+
+				}
+
+				return false;
+
+			}));
+
+			treeItem.SetText(0, product.Value.Name);
+
+			switch(GroupProductsBy) {
+
+				case ProductGroups.Category: {
+
+					treeItem.SetText(1, product.Value.Manufacturer);
+
+					break;
+
+				}
+
+				case ProductGroups.Manufacturer: {
+
+					treeItem.SetText(1, product.Value.Category);
+
+					break;
+
+				}
+
+			}
+
+			Vector3 size = product.Value.Size;
+
+			treeItem.SetText(2, $"{size.X} x {size.Y} x {size.Z}");
+
+			Vector2I rackPosition = Racks[product.Value.RackId].Position;
+			Vector2I productPosition = product.Value.Position;
+
+			treeItem.SetText(3, $"Rack {rackPosition.X}:{rackPosition.Y}, Shelf {productPosition.X}, Spot {productPosition.Y}");
+
+		}
+
+	}
+
+	public virtual void UpdateGroupByPopupName() =>
+		GroupByPopup!.Name = $"Group By {GroupProductsBy}";
+
+	public enum ProductGroups {
+
+		Category,
+		Manufacturer
 
 	}
 

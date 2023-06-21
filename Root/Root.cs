@@ -437,6 +437,8 @@ public partial class Root : Node {
 			int rackShelf = data.ReadInt32();
 			int rackSpot = data.ReadInt32();
 			string buildingId = data.ReadString();
+			string productName = data.ReadString();
+			string productCategory = data.ReadString();
 
 			BuildingTab.BuildingTab? buildingTab =
 				BuildingsTabContainer!.GetChildren()
@@ -456,7 +458,9 @@ public partial class Root : Node {
 										new(productLength, productHeight, productWidth),
 										productManufacturer,
 										rackId,
-										new(rackShelf, rackSpot));
+										new(rackShelf, rackSpot),
+										productName,
+										productCategory);
 
 		});
 
