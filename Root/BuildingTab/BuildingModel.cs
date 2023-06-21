@@ -61,7 +61,7 @@ public partial class BuildingModel : Node3D {
 
 	public override void _Ready() {
 
-		TargetCameraZoom = CameraPivot!.Position.Z;
+		TargetCameraZoom = Camera!.Position.Z;
 
 	}
 
@@ -172,7 +172,7 @@ public partial class BuildingModel : Node3D {
 
 		TargetCameraZoom += (forward ? -1 : 1) * CameraZoomSpeed;
 
-		TargetCameraZoom = Mathf.Clamp(TargetCameraZoom, 0.1f, 100);
+		TargetCameraZoom = Mathf.Clamp(TargetCameraZoom, CameraZoomSpeed, 100);
 
 	}
 

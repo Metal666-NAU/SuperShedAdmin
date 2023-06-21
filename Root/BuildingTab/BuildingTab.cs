@@ -198,13 +198,20 @@ public partial class BuildingTab : Control {
 
 	public virtual void OnSaveBuildingSizeButtonPressed() {
 
+		Vector3I buildingSize =
+			new(Mathf.RoundToInt(BuildingWidthInput!.Value),
+						Mathf.RoundToInt(BuildingHeightInput!.Value),
+						Mathf.RoundToInt(BuildingLengthInput!.Value));
+
 		Client.SendUpdateBuilding(Building!.Id,
 									Building!.Name,
-									Mathf.RoundToInt(BuildingWidthInput!.Value),
-									Mathf.RoundToInt(BuildingLengthInput!.Value),
-									Mathf.RoundToInt(BuildingHeightInput!.Value));
+									buildingSize.X,
+									buildingSize.Z,
+									buildingSize.Y);
 
 		ToggleBuildingSizeEditing(false);
+
+		BuildingModel!.SetSize(buildingSize);
 
 	}
 
@@ -287,6 +294,8 @@ public partial class BuildingTab : Control {
 									Spacing,
 									Rotation,
 									false);
+
+		BuildingModel.SelectedRack = null;
 
 	}
 

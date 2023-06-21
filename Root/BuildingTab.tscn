@@ -151,15 +151,16 @@ RackContainer = NodePath("RackContainer")
 Rack = ExtResource("3_e0s76")
 CameraZoomSpeed = 0.75
 CameraZoomSmoothing = 0.5
-CameraMoveSpeed = 0.02
+CameraMoveSpeed = 0.01
 CameraMoveSmoothing = 0.5
 
 [node name="CameraOrigin" type="Node3D" parent="VBoxContainer/PrimaryView/MarginContainer/BuildingModelViewportContainer/BuildingModelViewport/BuildingModelRoot/BuildingModel"]
 
 [node name="CameraPivot" type="Node3D" parent="VBoxContainer/PrimaryView/MarginContainer/BuildingModelViewportContainer/BuildingModelViewport/BuildingModelRoot/BuildingModel/CameraOrigin"]
-transform = Transform3D(1, 0, 0, 0, 0.5, 0.866025, 0, -0.866025, 0.5, 0, 10, 4)
+transform = Transform3D(1, 0, 0, 0, 0.5, 0.866025, 0, -0.866025, 0.5, 0, 0, 0)
 
 [node name="Camera3D" type="Camera3D" parent="VBoxContainer/PrimaryView/MarginContainer/BuildingModelViewportContainer/BuildingModelViewport/BuildingModelRoot/BuildingModel/CameraOrigin/CameraPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 10)
 environment = SubResource("Environment_04ldb")
 far = 500.0
 
