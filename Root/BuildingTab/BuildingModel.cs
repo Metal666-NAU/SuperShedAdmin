@@ -241,6 +241,7 @@ public partial class BuildingModel : Node3D {
 
 	public void UpdateProduct(string productId,
 								string rackId,
+								string productName,
 								Vector3 size,
 								Vector2I position) {
 
@@ -254,7 +255,7 @@ public partial class BuildingModel : Node3D {
 
 		}
 
-		rack.UpdateProduct(productId, size, position);
+		rack.UpdateProduct(productId, productName, size, position);
 
 	}
 

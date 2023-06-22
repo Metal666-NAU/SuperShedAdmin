@@ -285,7 +285,7 @@ public partial class BuildingTab : Control {
 
 		foreach(KeyValuePair<string, (Vector3 Size, string Manufacturer, string RackId, Vector2I Position, string Name, string Category)> product in Products.Where(product => product.Value.RackId.Equals(BuildingModel.SelectedRack))) {
 
-			rack.UpdateProduct(product.Key, product.Value.Size, product.Value.Position);
+			rack.UpdateProduct(product.Key, product.Value.Name, product.Value.Size, product.Value.Position);
 
 		}
 
@@ -411,7 +411,7 @@ public partial class BuildingTab : Control {
 
 		foreach(KeyValuePair<string, (Vector3 Size, string Manufacturer, string RackId, Vector2I Position, string Name, string Category)> product in Products.Where(product => product.Value.RackId.Equals(rackId))) {
 
-			rack.UpdateProduct(product.Key, product.Value.Size, product.Value.Position);
+			rack.UpdateProduct(product.Key, product.Value.Name, product.Value.Size, product.Value.Position);
 
 		}
 
@@ -429,6 +429,7 @@ public partial class BuildingTab : Control {
 
 		BuildingModel!.UpdateProduct(productId,
 										rackId,
+										productName,
 										productSize,
 										productPosition);
 

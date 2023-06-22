@@ -171,15 +171,30 @@ public partial class Rack : Node3D {
 
 	}
 
-	public virtual void UpdateProduct(string productId, Vector3 size, Vector2I position) {
+	public virtual void UpdateProduct(string productId, string productName, Vector3 size, Vector2I position) {
 
 		MeshInstance3D? productModel = ProductsContainer!.GetNode(productId) as MeshInstance3D;
+		Label3D? productInfo = productModel?.GetChild(0) as Label3D;
 
 		bool exists = productModel != null;
 
 		if(!exists) {
 
 			productModel = new MeshInstance3D();
+
+			productModel.RotateY(Mathf.DegToRad(-90));
+
+			productInfo = new() {
+
+				FontSize = 40,
+				OutlineSize = 16,
+				PixelSize = 0.0015f
+
+			};
+
+			productModel.AddChild(productInfo);
+
+			productInfo.Position = new(0, 0, Size.X / 2f);
 
 		}
 
@@ -195,6 +210,11 @@ public partial class Rack : Node3D {
 		productModel.Position = new(0, position.X * Spacing, ((position.Y - 1) * 0.5f) + 0.25f);
 
 		productModel.Translate(new(0, size.Y / 2, 0));
+
+		productInfo!.Text = $"{productName}\n" +
+							$"{size.X} x {size.Y} x {size.Z}\n" +
+							$"Shelf {position.X}\n" +
+							$"Spot {position.Y}";
 
 		if(!exists) {
 

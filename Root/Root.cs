@@ -455,7 +455,7 @@ public partial class Root : Node {
 			}
 
 			buildingTab.UpdateProduct(productId,
-										new(productLength, productHeight, productWidth),
+										new(productWidth, productHeight, productLength),
 										productManufacturer,
 										rackId,
 										new(rackShelf, rackSpot),
