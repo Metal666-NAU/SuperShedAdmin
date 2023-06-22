@@ -35,6 +35,9 @@ public partial class BuildingTab : Control {
 	public virtual Panel? RackSettingsPanel { get; set; }
 
 	[Export]
+	public virtual LineEdit? RackIdOutput { get; set; }
+
+	[Export]
 	public virtual SpinBox? RackXInput { get; set; }
 
 	[Export]
@@ -71,7 +74,13 @@ public partial class BuildingTab : Control {
 	public virtual Tree? ProductsTree { get; set; }
 
 	[Export]
+	public virtual VBoxContainer? ProductQRCodePanel { get; set; }
+
+	[Export]
 	public virtual TextureRect? ProductQRCodeTexture { get; set; }
+
+	[Export]
+	public virtual LineEdit? ProductIdOutput { get; set; }
 
 	[Export]
 	public virtual SpinBox? BuildingWidthInput { get; set; }
@@ -356,6 +365,8 @@ public partial class BuildingTab : Control {
 			(Vector2I Position, Vector2I Size, int Shelves, float Spacing, float Rotation) =
 				Racks[BuildingModel!.SelectedRack!];
 
+			RackIdOutput!.Text = BuildingModel.SelectedRack;
+
 			RackXInput!.SetValueNoSignal(Position.X);
 			RackZInput!.SetValueNoSignal(Position.Y);
 
@@ -580,7 +591,7 @@ public partial class BuildingTab : Control {
 
 			if(groupItems.Contains(selectedItem)) {
 
-				ProductQRCodeTexture!.Hide();
+				ProductQRCodePanel!.Hide();
 
 				return;
 
@@ -592,17 +603,25 @@ public partial class BuildingTab : Control {
 
 			}
 
-			QrCode qrCode = QrCode.EncodeText(selectedItem.GetMeta("productId").AsString(), QrCode.Ecc.High);
+			string productId = selectedItem.GetMeta("productId").AsString();
 
-			int size = qrCode.Size;
+			QrCode qrCode = QrCode.EncodeText(productId, QrCode.Ecc.High);
+
+			int size = qrCode.Size + 4;
 
 			Image qrCodeImage = Image.Create(size, size, false, Image.Format.L8);
 
-			for(int i = 0; i < size; i++) {
+			qrCodeImage.Fill(Colors.White);
 
-				for(int j = 0; j < size; j++) {
+			for(int i = 2; i < size - 2; i++) {
 
-					qrCodeImage.SetPixel(i, j, qrCode.GetModule(i, j) ? Colors.Black : Colors.White);
+				for(int j = 2; j < size - 2; j++) {
+
+					qrCodeImage.SetPixel(i,
+											j,
+											qrCode.GetModule(i - 2, j - 2) ?
+												Colors.Black :
+												Colors.White);
 
 				}
 
@@ -612,11 +631,13 @@ public partial class BuildingTab : Control {
 
 			ProductQRCodeTexture.TextureFilter = TextureFilterEnum.Nearest;
 
-			ProductQRCodeTexture.Show();
+			ProductQRCodePanel!.Show();
+
+			ProductIdOutput!.Text = productId;
 
 		};
 
-		ProductsTree.EmptyClicked += (position, mouseButtonIndex) => ProductQRCodeTexture!.Hide();
+		ProductsTree.EmptyClicked += (position, mouseButtonIndex) => ProductQRCodePanel!.Hide();
 
 	}
 

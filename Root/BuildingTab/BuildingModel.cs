@@ -140,7 +140,7 @@ public partial class BuildingModel : Node3D {
 
 					case MouseButton.Left: {
 
-						if(SelectedRack != null || ObservedRack != null) {
+						if(SelectedRack != null) {
 
 							break;
 
@@ -159,7 +159,7 @@ public partial class BuildingModel : Node3D {
 						CameraObserveOrigin!.Position = rack.Position;
 						CameraObserveOrigin.RotationDegrees = rackRotation;
 
-						Camera!.KeepAspect = (rackHeight + rackWidth) > rackLength ?
+						Camera!.KeepAspect = (rackHeight + rackWidth) >= rackLength ?
 												Camera3D.KeepAspectEnum.Height :
 												Camera3D.KeepAspectEnum.Width;
 
@@ -197,7 +197,7 @@ public partial class BuildingModel : Node3D {
 
 					case MouseButton.Right: {
 
-						if(SelectedRack != null || ObservedRack != null) {
+						if(SelectedRack != null) {
 
 							break;
 
@@ -273,8 +273,13 @@ public partial class BuildingModel : Node3D {
 
 	}
 
-	public virtual void RemoveRack(string rackId) =>
+	public virtual void RemoveRack(string rackId) {
+
 		GetRack(SelectedRack)?.QueueFree();
+
+		SelectedRack = null;
+
+	}
 
 	public virtual void Zoom(bool forward) {
 

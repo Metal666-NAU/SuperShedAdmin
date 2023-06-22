@@ -1,5 +1,6 @@
 using Godot;
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -139,15 +140,9 @@ public partial class Rack : Node3D {
 
 	}
 
-	public virtual void SetSelected(bool isSelected) =>
-		ApplyMaterial((isSelected ? SelectedMaterial : NormalMaterial)!,
-						(isSelected ? SelectedMaterial : ProductMaterial)!);
+	public virtual void SetSelected(bool isSelected) {
 
-	public virtual void SetHidden(bool isHidden) =>
-		ApplyMaterial((isHidden ? HiddenMaterial : NormalMaterial)!,
-						(isHidden ? HiddenMaterial : ProductMaterial)!);
-
-	protected virtual void ApplyMaterial(Material partMaterial, Material productMaterial) {
+		Material partMaterial = (isSelected ? SelectedMaterial : NormalMaterial)!;
 
 		foreach(MeshInstance3D part in Parts) {
 
@@ -158,6 +153,8 @@ public partial class Rack : Node3D {
 			}
 
 		}
+
+		Material productMaterial = (isSelected ? SelectedMaterial : ProductMaterial)!;
 
 		foreach(MeshInstance3D product in ProductsContainer!.GetChildren().Cast<MeshInstance3D>()) {
 
@@ -171,10 +168,13 @@ public partial class Rack : Node3D {
 
 	}
 
+	public virtual void SetHidden(bool isHidden) =>
+		Visible = !isHidden;
+
 	public virtual void UpdateProduct(string productId, string productName, Vector3 size, Vector2I position) {
 
-		MeshInstance3D? productModel = ProductsContainer!.GetNode(productId) as MeshInstance3D;
-		Label3D? productInfo = productModel?.GetChild(0) as Label3D;
+		MeshInstance3D? productModel = ProductsContainer!.GetNodeOrNull<MeshInstance3D>(productId);
+		Label3D? productInfo = productModel?.GetChildOrNull<Label3D>(0);
 
 		bool exists = productModel != null;
 
@@ -188,7 +188,9 @@ public partial class Rack : Node3D {
 
 				FontSize = 40,
 				OutlineSize = 16,
-				PixelSize = 0.0015f
+				PixelSize = 0.0015f,
+				Width = 300,
+				AutowrapMode = TextServer.AutowrapMode.Word
 
 			};
 
@@ -207,9 +209,10 @@ public partial class Rack : Node3D {
 
 		};
 
-		productModel.Position = new(0, position.X * Spacing, ((position.Y - 1) * 0.5f) + 0.25f);
-
-		productModel.Translate(new(0, size.Y / 2, 0));
+		productModel.Position =
+			new(0,
+						position.X * Spacing + size.Y / 2,
+						(position.Y * 0.5f) - 0.25f + ((float) Math.Floor(size.X / 0.5f) * 0.25f));
 
 		productInfo!.Text = $"{productName}\n" +
 							$"{size.X} x {size.Y} x {size.Z}\n" +

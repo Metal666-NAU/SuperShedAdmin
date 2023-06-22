@@ -51,7 +51,7 @@ content_margin_right = 15.0
 content_margin_bottom = 2.0
 bg_color = Color(0, 0, 0, 0.27451)
 
-[node name="BuildingTab" type="Control" node_paths=PackedStringArray("PrimaryViewButton", "SecondaryViewButton", "PrimaryView", "BuildingModelViewport", "BuildingModel", "StopObservingRackButton", "RackSettingsPanel", "RackXInput", "RackZInput", "RackWidthInput", "RackLengthInput", "RackShelvesInput", "RackSpacingInput", "RackRotationInput", "SaveRackSettingsButton", "DeleteRackButton", "SecondaryView", "GroupByPopup", "ProductsTree", "ProductQRCodeTexture", "BuildingWidthInput", "BuildingLengthInput", "BuildingHeightInput", "EditBuildingSizeButton", "SaveBuildingSizeButton", "CancelEditingBuildingSizeButton")]
+[node name="BuildingTab" type="Control" node_paths=PackedStringArray("PrimaryViewButton", "SecondaryViewButton", "PrimaryView", "BuildingModelViewport", "BuildingModel", "StopObservingRackButton", "RackSettingsPanel", "RackIdOutput", "RackXInput", "RackZInput", "RackWidthInput", "RackLengthInput", "RackShelvesInput", "RackSpacingInput", "RackRotationInput", "SaveRackSettingsButton", "DeleteRackButton", "SecondaryView", "GroupByPopup", "ProductsTree", "ProductQRCodePanel", "ProductQRCodeTexture", "ProductIdOutput", "BuildingWidthInput", "BuildingLengthInput", "BuildingHeightInput", "EditBuildingSizeButton", "SaveBuildingSizeButton", "CancelEditingBuildingSizeButton")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -67,6 +67,7 @@ BuildingModelViewport = NodePath("VBoxContainer/PrimaryView/MarginContainer/Buil
 BuildingModel = NodePath("VBoxContainer/PrimaryView/MarginContainer/BuildingModelViewportContainer/BuildingModelViewport/BuildingModelRoot/BuildingModel")
 StopObservingRackButton = NodePath("VBoxContainer/PrimaryView/StopObservingRackButton")
 RackSettingsPanel = NodePath("VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel")
+RackIdOutput = NodePath("VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer/RackIdOutput")
 RackXInput = NodePath("VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer/PositionInputsContainer/RackXInput")
 RackZInput = NodePath("VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer/PositionInputsContainer/RackZInput")
 RackWidthInput = NodePath("VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer/SizeInputsContainer/RackWidthInput")
@@ -79,13 +80,15 @@ DeleteRackButton = NodePath("VBoxContainer/PrimaryView/MarginContainer/RackSetti
 SecondaryView = NodePath("VBoxContainer/SecondaryView")
 GroupByPopup = NodePath("VBoxContainer/SecondaryView/VBoxContainer/MenuBar/GroupBy")
 ProductsTree = NodePath("VBoxContainer/SecondaryView/VBoxContainer/HSplitContainer/ProductsTree")
-ProductQRCodeTexture = NodePath("VBoxContainer/SecondaryView/VBoxContainer/HSplitContainer/ProductQRCodeTexture")
-BuildingWidthInput = NodePath("VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer/BuildingWidthInput")
-BuildingLengthInput = NodePath("VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer/BuildingLengthInput")
-BuildingHeightInput = NodePath("VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer/BuildingHeightInput")
-EditBuildingSizeButton = NodePath("VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer/EditBuildingSizeButton")
-SaveBuildingSizeButton = NodePath("VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer/SaveBuildingSizeButton")
-CancelEditingBuildingSizeButton = NodePath("VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer/CancelEditingBuildingSizeButton")
+ProductQRCodePanel = NodePath("VBoxContainer/SecondaryView/VBoxContainer/HSplitContainer/ProductQRCodePanel")
+ProductQRCodeTexture = NodePath("VBoxContainer/SecondaryView/VBoxContainer/HSplitContainer/ProductQRCodePanel/ProductQRCodeTexture")
+ProductIdOutput = NodePath("VBoxContainer/SecondaryView/VBoxContainer/HSplitContainer/ProductQRCodePanel/ProductIdOutput")
+BuildingWidthInput = NodePath("VBoxContainer/SecondaryView/VBoxContainer/BottomPanel/HBoxContainer/BuildingWidthInput")
+BuildingLengthInput = NodePath("VBoxContainer/SecondaryView/VBoxContainer/BottomPanel/HBoxContainer/BuildingLengthInput")
+BuildingHeightInput = NodePath("VBoxContainer/SecondaryView/VBoxContainer/BottomPanel/HBoxContainer/BuildingHeightInput")
+EditBuildingSizeButton = NodePath("VBoxContainer/SecondaryView/VBoxContainer/BottomPanel/HBoxContainer/EditBuildingSizeButton")
+SaveBuildingSizeButton = NodePath("VBoxContainer/SecondaryView/VBoxContainer/BottomPanel/HBoxContainer/SaveBuildingSizeButton")
+CancelEditingBuildingSizeButton = NodePath("VBoxContainer/SecondaryView/VBoxContainer/BottomPanel/HBoxContainer/CancelEditingBuildingSizeButton")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 1
@@ -115,7 +118,7 @@ layout_mode = 2
 toggle_mode = true
 text = "Tree View"
 
-[node name="Separator" type="Control" parent="VBoxContainer/MarginContainer/HBoxContainer"]
+[node name="Spacer" type="Control" parent="VBoxContainer/MarginContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 
@@ -147,7 +150,7 @@ stretch = true
 [node name="BuildingModelViewport" type="SubViewport" parent="VBoxContainer/PrimaryView/MarginContainer/BuildingModelViewportContainer"]
 handle_input_locally = false
 physics_object_picking = true
-size = Vector2i(1142, 598)
+size = Vector2i(2, 2)
 render_target_update_mode = 4
 
 [node name="BuildingModelRoot" type="Node3D" parent="VBoxContainer/PrimaryView/MarginContainer/BuildingModelViewportContainer/BuildingModelViewport"]
@@ -155,6 +158,8 @@ render_target_update_mode = 4
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="VBoxContainer/PrimaryView/MarginContainer/BuildingModelViewportContainer/BuildingModelViewport/BuildingModelRoot"]
 transform = Transform3D(0.866025, 0.353553, -0.353553, 0, 0.707107, 0.707107, 0.5, -0.612372, 0.612372, 0, 10, 0)
 shadow_enabled = true
+shadow_blur = 0.3
+directional_shadow_max_distance = 50.0
 
 [node name="BuildingModel" type="Node3D" parent="VBoxContainer/PrimaryView/MarginContainer/BuildingModelViewportContainer/BuildingModelViewport/BuildingModelRoot" node_paths=PackedStringArray("CameraOrigin", "CameraPivot", "CameraDolly", "CameraObserveOrigin", "CameraObservePivot", "Camera", "Floor", "NorthWall", "EastWall", "SouthWall", "WestWall", "RackContainer")]
 script = ExtResource("2_33k60")
@@ -186,7 +191,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 10)
 
 [node name="Camera3D" type="Camera3D" parent="VBoxContainer/PrimaryView/MarginContainer/BuildingModelViewportContainer/BuildingModelViewport/BuildingModelRoot/BuildingModel/CameraOrigin/CameraPivot/CameraDolly"]
 environment = SubResource("Environment_04ldb")
-far = 500.0
+far = 200.0
 
 [node name="CameraObserveOrigin" type="Node3D" parent="VBoxContainer/PrimaryView/MarginContainer/BuildingModelViewportContainer/BuildingModelViewport/BuildingModelRoot/BuildingModel"]
 
@@ -248,8 +253,17 @@ text = "Rack Editor"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="HSeparator2" type="HSeparator" parent="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer"]
+[node name="TopSeparator" type="HSeparator" parent="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
+
+[node name="IdLabel" type="Label" parent="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Id:"
+
+[node name="RackIdOutput" type="LineEdit" parent="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+editable = false
+select_all_on_focus = true
 
 [node name="PositionLabel" type="Label" parent="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -341,7 +355,7 @@ prefix = "Rotation:"
 suffix = "°"
 custom_arrow_step = 1.0
 
-[node name="HSeparator" type="HSeparator" parent="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer"]
+[node name="BottomSeparator" type="HSeparator" parent="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer"]
@@ -358,7 +372,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "Cancel"
 
-[node name="Separator" type="Control" parent="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer"]
+[node name="BottomSpacer" type="Control" parent="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 mouse_filter = 1
@@ -403,6 +417,7 @@ layout_mode = 2
 prefer_global_menu = false
 
 [node name="GroupBy" type="PopupMenu" parent="VBoxContainer/SecondaryView/VBoxContainer/MenuBar"]
+size = Vector2i(155, 62)
 item_count = 2
 item_0/text = "Category"
 item_0/checkable = 2
@@ -424,18 +439,26 @@ columns = 5
 column_titles_visible = true
 hide_root = true
 
-[node name="ProductQRCodeTexture" type="TextureRect" parent="VBoxContainer/SecondaryView/VBoxContainer/HSplitContainer"]
+[node name="ProductQRCodePanel" type="VBoxContainer" parent="VBoxContainer/SecondaryView/VBoxContainer/HSplitContainer"]
 visible = false
+layout_mode = 2
+
+[node name="ProductQRCodeTexture" type="TextureRect" parent="VBoxContainer/SecondaryView/VBoxContainer/HSplitContainer/ProductQRCodePanel"]
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
 expand_mode = 4
 stretch_mode = 5
 
-[node name="Panel" type="Panel" parent="VBoxContainer/SecondaryView/VBoxContainer"]
+[node name="ProductIdOutput" type="LineEdit" parent="VBoxContainer/SecondaryView/VBoxContainer/HSplitContainer/ProductQRCodePanel"]
+layout_mode = 2
+editable = false
+select_all_on_focus = true
+
+[node name="BottomPanel" type="Panel" parent="VBoxContainer/SecondaryView/VBoxContainer"]
 custom_minimum_size = Vector2(0, 35)
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/SecondaryView/VBoxContainer/Panel"]
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/SecondaryView/VBoxContainer/BottomPanel"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -443,14 +466,14 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Label" type="Label" parent="VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer"]
+[node name="Label" type="Label" parent="VBoxContainer/SecondaryView/VBoxContainer/BottomPanel/HBoxContainer"]
 custom_minimum_size = Vector2(125, 0)
 layout_mode = 2
 text = "Building Size:"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="BuildingWidthInput" type="SpinBox" parent="VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer"]
+[node name="BuildingWidthInput" type="SpinBox" parent="VBoxContainer/SecondaryView/VBoxContainer/BottomPanel/HBoxContainer"]
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 min_value = 1.0
@@ -461,7 +484,7 @@ editable = false
 prefix = "Width"
 suffix = "m"
 
-[node name="BuildingLengthInput" type="SpinBox" parent="VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer"]
+[node name="BuildingLengthInput" type="SpinBox" parent="VBoxContainer/SecondaryView/VBoxContainer/BottomPanel/HBoxContainer"]
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 min_value = 1.0
@@ -472,7 +495,7 @@ editable = false
 prefix = "Length"
 suffix = "m"
 
-[node name="BuildingHeightInput" type="SpinBox" parent="VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer"]
+[node name="BuildingHeightInput" type="SpinBox" parent="VBoxContainer/SecondaryView/VBoxContainer/BottomPanel/HBoxContainer"]
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 min_value = 1.0
@@ -483,16 +506,16 @@ editable = false
 prefix = "Height"
 suffix = "m"
 
-[node name="EditBuildingSizeButton" type="Button" parent="VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer"]
+[node name="EditBuildingSizeButton" type="Button" parent="VBoxContainer/SecondaryView/VBoxContainer/BottomPanel/HBoxContainer"]
 layout_mode = 2
 text = "Edit"
 
-[node name="SaveBuildingSizeButton" type="Button" parent="VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer"]
+[node name="SaveBuildingSizeButton" type="Button" parent="VBoxContainer/SecondaryView/VBoxContainer/BottomPanel/HBoxContainer"]
 visible = false
 layout_mode = 2
 text = "Save"
 
-[node name="CancelEditingBuildingSizeButton" type="Button" parent="VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer"]
+[node name="CancelEditingBuildingSizeButton" type="Button" parent="VBoxContainer/SecondaryView/VBoxContainer/BottomPanel/HBoxContainer"]
 visible = false
 layout_mode = 2
 text = "Cancel"
@@ -513,9 +536,9 @@ text = "Cancel"
 [connection signal="pressed" from="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer/DeleteRackButton" to="." method="OnDeleteRackButtonPressed"]
 [connection signal="pressed" from="VBoxContainer/PrimaryView/StopObservingRackButton" to="." method="OnStopObservingRackButtonPressed"]
 [connection signal="index_pressed" from="VBoxContainer/SecondaryView/VBoxContainer/MenuBar/GroupBy" to="." method="OnProductsGroupingChanged"]
-[connection signal="value_changed" from="VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer/BuildingWidthInput" to="." method="OnBuildingSizeChanged"]
-[connection signal="value_changed" from="VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer/BuildingLengthInput" to="." method="OnBuildingSizeChanged"]
-[connection signal="value_changed" from="VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer/BuildingHeightInput" to="." method="OnBuildingSizeChanged"]
-[connection signal="pressed" from="VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer/EditBuildingSizeButton" to="." method="OnEditBuildingSizeButtonPressed"]
-[connection signal="pressed" from="VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer/SaveBuildingSizeButton" to="." method="OnSaveBuildingSizeButtonPressed"]
-[connection signal="pressed" from="VBoxContainer/SecondaryView/VBoxContainer/Panel/HBoxContainer/CancelEditingBuildingSizeButton" to="." method="OnCancelEditingBuildingSizeButtonPressed"]
+[connection signal="value_changed" from="VBoxContainer/SecondaryView/VBoxContainer/BottomPanel/HBoxContainer/BuildingWidthInput" to="." method="OnBuildingSizeChanged"]
+[connection signal="value_changed" from="VBoxContainer/SecondaryView/VBoxContainer/BottomPanel/HBoxContainer/BuildingLengthInput" to="." method="OnBuildingSizeChanged"]
+[connection signal="value_changed" from="VBoxContainer/SecondaryView/VBoxContainer/BottomPanel/HBoxContainer/BuildingHeightInput" to="." method="OnBuildingSizeChanged"]
+[connection signal="pressed" from="VBoxContainer/SecondaryView/VBoxContainer/BottomPanel/HBoxContainer/EditBuildingSizeButton" to="." method="OnEditBuildingSizeButtonPressed"]
+[connection signal="pressed" from="VBoxContainer/SecondaryView/VBoxContainer/BottomPanel/HBoxContainer/SaveBuildingSizeButton" to="." method="OnSaveBuildingSizeButtonPressed"]
+[connection signal="pressed" from="VBoxContainer/SecondaryView/VBoxContainer/BottomPanel/HBoxContainer/CancelEditingBuildingSizeButton" to="." method="OnCancelEditingBuildingSizeButtonPressed"]

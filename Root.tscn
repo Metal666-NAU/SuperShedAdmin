@@ -99,6 +99,7 @@ layout_mode = 2
 size_flags_vertical = 3
 
 [node name="OnlineWorkerPopupMenu" type="PopupMenu" parent="Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer/OnlineWorkersList"]
+size = Vector2i(126, 35)
 item_count = 1
 item_0/text = "Revoke Auth"
 item_0/id = 0
@@ -116,6 +117,7 @@ layout_mode = 2
 size_flags_vertical = 3
 
 [node name="OfflineWorkerPopupMenu" type="PopupMenu" parent="Home/ContentPanel/VSplitContainer/HSplitContainer/WorkersPanel/VBoxContainer/OfflineWorkersList"]
+size = Vector2i(145, 62)
 item_count = 2
 item_0/text = "Get Login Code"
 item_0/id = 0
@@ -171,7 +173,7 @@ toggle_mode = true
 text = "Server Logs"
 flat = true
 
-[node name="Separator" type="Control" parent="Home/BottomBar/MarginContainer/HBoxContainer"]
+[node name="Spacer" type="Control" parent="Home/BottomBar/MarginContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 1
@@ -184,6 +186,11 @@ vertical_alignment = 1
 [node name="ConnectionActionButton" type="Button" parent="Home/BottomBar/MarginContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 4
+
+[node name="LogOutButton" type="Button" parent="Home/BottomBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 4
+text = "Log Out"
 
 [node name="LoadingBarrier" type="Panel" parent="." node_paths=PackedStringArray("LoadingMessage")]
 visible = false
@@ -408,6 +415,7 @@ text = "Cancel"
 [connection signal="pressed" from="Home/ContentPanel/ShowWorkersButton" to="." method="OnWorkersPanelToggled" binds= [true]]
 [connection signal="toggled" from="Home/BottomBar/MarginContainer/HBoxContainer/ServerLogsButton" to="." method="OnServerLogsButtonToggled"]
 [connection signal="pressed" from="Home/BottomBar/MarginContainer/HBoxContainer/ConnectionActionButton" to="." method="OnConnectionActionButtonPressed"]
+[connection signal="pressed" from="Home/BottomBar/MarginContainer/HBoxContainer/LogOutButton" to="." method="OnLogOutButtonPressed"]
 [connection signal="LoginCredentialsSubmitted" from="PromptBarrier/LoginPrompt" to="." method="OnLoginCredentialsSubmitted"]
 [connection signal="toggled" from="PromptBarrier/LoginPrompt/VBoxContainer/MarginContainer/LoginForm/HBoxContainer/PasswordVisibilityButton" to="PromptBarrier/LoginPrompt" method="OnPasswordVisibilityButtonToggled"]
 [connection signal="pressed" from="PromptBarrier/LoginPrompt/VBoxContainer/MarginContainer/LoginForm/SubmitButton" to="PromptBarrier" method="HidePrompt"]

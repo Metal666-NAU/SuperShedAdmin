@@ -63,31 +63,6 @@ public partial class Root : Node {
 
 	}
 
-	public virtual void OnConnectionActionButtonPressed() {
-
-		switch(Client.ConnectionStatus) {
-
-			case ConnectionStatus.Connected:
-			case ConnectionStatus.Connecting: {
-
-				Client.DisconnectClient();
-
-				break;
-
-			}
-
-			case ConnectionStatus.Disconnected: {
-
-				Client.StartClient();
-
-				break;
-
-			}
-
-		}
-
-	}
-
 	public virtual void OnWorkersPanelToggled(bool open) {
 
 		WorkersPanel!.Visible = open;
@@ -166,6 +141,39 @@ public partial class Root : Node {
 	public virtual void OnServerLogsButtonToggled(bool pressed) {
 
 		LogsList!.Visible = pressed;
+
+	}
+
+	public virtual void OnConnectionActionButtonPressed() {
+
+		switch(Client.ConnectionStatus) {
+
+			case ConnectionStatus.Connected:
+			case ConnectionStatus.Connecting: {
+
+				Client.DisconnectClient();
+
+				break;
+
+			}
+
+			case ConnectionStatus.Disconnected: {
+
+				Client.StartClient();
+
+				break;
+
+			}
+
+		}
+
+	}
+
+	public virtual void OnLogOutButtonPressed() {
+
+		Settings.Instance.AuthToken = null;
+
+		Client.DisconnectClient();
 
 	}
 
