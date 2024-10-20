@@ -9,7 +9,8 @@ namespace SuperShedAdmin;
 
 public class Settings {
 
-	public static Settings Instance { get; set; } = Load();
+	public static Settings Instance { get; set; } =
+		Load() ?? new();
 
 	public static string Path => ProjectSettings.GlobalizePath("user://settings.json");
 
@@ -37,20 +38,21 @@ public class Settings {
 
 	}
 
-	public static Settings Load() {
+	public static Settings? Load() {
 
-		Settings settings = new();
+		Settings? settings = null;
+
+		if(!File.Exists(Path)) {
+
+			return null;
+
+		}
 
 		try {
 
-			if(!File.Exists(Path)) {
-
-				return settings;
-
-			}
-
-			settings = JsonSerializer.Deserialize<Settings>(File.ReadAllText(Path),
-															JsonSerializerOptions)!;
+			settings =
+				JsonSerializer.Deserialize<Settings>(File.ReadAllText(Path),
+														JsonSerializerOptions);
 
 		}
 
@@ -68,7 +70,11 @@ public class Settings {
 
 		try {
 
-			Directory.CreateDirectory(System.IO.Path.GetDirectoryName(Path)!);
+			string? settingsDirectory =
+				System.IO.Path.GetDirectoryName(Path) ??
+					throw new("Failed to create settings directory!");
+
+			Directory.CreateDirectory(settingsDirectory);
 
 			File.WriteAllText(Path,
 								JsonSerializer.Serialize(Instance,

@@ -1,6 +1,7 @@
 using Godot;
 
-using System;
+using Metal666.GodotUtilities.Extensions;
+
 using System.Collections.Generic;
 using System.Linq;
 
@@ -8,37 +9,44 @@ namespace SuperShedAdmin.Root.BuildingTab.Rack;
 
 public partial class Rack : Node3D {
 
+#nullable disable
 	[Export]
-	public virtual Node3D? ModelContainer { get; set; }
+	public virtual Node3D ModelContainer { get; set; }
 
 	[Export]
-	public virtual Node3D? ProductsContainer { get; set; }
+	public virtual Node3D ProductsContainer { get; set; }
 
 	[Export]
-	public virtual CollisionShape3D? CollisionBox { get; set; }
+	public virtual CollisionShape3D CollisionBox { get; set; }
 
 	[Export]
-	public virtual Material? NormalMaterial { get; set; }
+	public virtual Material NormalMaterial { get; set; }
 
 	[Export]
-	public virtual Material? SelectedMaterial { get; set; }
+	public virtual Material SelectedMaterial { get; set; }
 
 	[Export]
-	public virtual Material? HiddenMaterial { get; set; }
+	public virtual Material HiddenMaterial { get; set; }
 
 	[Export]
-	public virtual Material? ProductMaterial { get; set; }
+	public virtual Material ProductMaterial { get; set; }
+
+	public virtual string Id { get; set; }
+	public virtual Vector2I Size { get; set; }
+	public virtual int Shelves { get; set; }
+	public virtual float Spacing { get; set; }
+#nullable enable
+
+	public virtual IEnumerable<MeshInstance3D> Products =>
+		ProductsContainer.GetChildren()
+							.Cast<MeshInstance3D>();
+
+	public virtual List<MeshInstance3D> Parts { get; set; } = [];
 
 	[Signal]
 	public delegate void ClickedEventHandler(long mouseButtonIndex);
 
-	public virtual string? Id { get; set; }
-	public virtual Vector2I Size { get; set; }
-	public virtual int Shelves { get; set; }
-	public virtual float Spacing { get; set; }
-
-	public virtual List<MeshInstance3D> Parts { get; set; } = new();
-
+	#region Signal Handlers
 	public virtual void OnCollisionAreaInputEvent(Node camera,
 													InputEvent inputEvent,
 													Vector3 position,
@@ -60,12 +68,13 @@ public partial class Rack : Node3D {
 		EmitSignal(SignalName.Clicked, (long) inputEventMouseButton.ButtonIndex);
 
 	}
+	#endregion
 
 	public virtual void UpdateVisuals(bool setSelected = false) {
 
 		Parts.Clear();
 
-		foreach(Node modelPart in ModelContainer!.GetChildren()) {
+		foreach(Node modelPart in ModelContainer.GetChildren()) {
 
 			modelPart.QueueFree();
 
@@ -88,9 +97,9 @@ public partial class Rack : Node3D {
 
 			Parts.Add(shelf);
 
-			ModelContainer!.AddChild(shelf);
+			ModelContainer.AddChild(shelf);
 
-			shelf.Translate(new(0, ((i + 1) * Spacing) - (shelfThickness / 2), 0));
+			shelf.Translate(Vector3.Up * (((i + 1) * Spacing) - (shelfThickness / 2)));
 
 		}
 
@@ -113,7 +122,7 @@ public partial class Rack : Node3D {
 
 			Parts.Add(leg);
 
-			ModelContainer!.AddChild(leg);
+			ModelContainer.AddChild(leg);
 
 			int xMultiplier = i % 2 == 0 ? 1 : -1;
 			int zMultiplier = i >= 2 ? -1 : 1;
@@ -126,9 +135,10 @@ public partial class Rack : Node3D {
 
 		float collisionBoxHeight = Shelves * Spacing;
 
-		(CollisionBox!.Shape as BoxShape3D)!.Size = new(Size.X, collisionBoxHeight, Size.Y);
+		(CollisionBox.Shape as BoxShape3D)!.Size =
+			new(Size.X, collisionBoxHeight, Size.Y);
 
-		CollisionBox.Position = new(0, collisionBoxHeight / 2, 0);
+		CollisionBox.Position = Vector3.Up * collisionBoxHeight / 2;
 
 		if(setSelected) {
 
@@ -136,13 +146,14 @@ public partial class Rack : Node3D {
 
 		}
 
-		ProductsContainer!.Position = new(0, 0, -Size.Y / 2f);
+		ProductsContainer.Position = Vector3.Forward * (Size.Y / 2f);
 
 	}
 
 	public virtual void SetSelected(bool isSelected) {
 
-		Material partMaterial = (isSelected ? SelectedMaterial : NormalMaterial)!;
+		Material partMaterial =
+			isSelected ? SelectedMaterial : NormalMaterial;
 
 		foreach(MeshInstance3D part in Parts) {
 
@@ -154,9 +165,10 @@ public partial class Rack : Node3D {
 
 		}
 
-		Material productMaterial = (isSelected ? SelectedMaterial : ProductMaterial)!;
+		Material productMaterial =
+			isSelected ? SelectedMaterial : ProductMaterial;
 
-		foreach(MeshInstance3D product in ProductsContainer!.GetChildren().Cast<MeshInstance3D>()) {
+		foreach(MeshInstance3D product in Products) {
 
 			for(int i = 0; i < product.Mesh.GetSurfaceCount(); i++) {
 
@@ -173,8 +185,12 @@ public partial class Rack : Node3D {
 
 	public virtual void UpdateProduct(string productId, string productName, Vector3 size, Vector2I position) {
 
-		MeshInstance3D? productModel = ProductsContainer!.GetNodeOrNull<MeshInstance3D>(productId);
-		Label3D? productInfo = productModel?.GetChildOrNull<Label3D>(0);
+		MeshInstance3D? productModel =
+			Products.FirstOrDefault(product =>
+												product.Name == productId);
+
+		Label3D? productInfo =
+			productModel?.GetChildOrNull<Label3D>(0);
 
 		bool exists = productModel != null;
 
@@ -182,21 +198,23 @@ public partial class Rack : Node3D {
 
 			productModel = new MeshInstance3D();
 
-			productModel.RotateY(Mathf.DegToRad(-90));
+			productModel.RotateYDeg(-90);
 
 			productInfo = new() {
 
 				FontSize = 40,
 				OutlineSize = 16,
 				PixelSize = 0.0015f,
-				Width = 300,
-				AutowrapMode = TextServer.AutowrapMode.Word
+				Width = 350,
+				AutowrapMode = TextServer.AutowrapMode.Word,
+				NoDepthTest = true
 
 			};
 
 			productModel.AddChild(productInfo);
 
-			productInfo.Position = new(0, 0, Size.X / 2f);
+			productInfo.Position =
+				Vector3.Back * (Size.X / 2f);
 
 		}
 
@@ -212,12 +230,13 @@ public partial class Rack : Node3D {
 		productModel.Position =
 			new(0,
 						position.X * Spacing + size.Y / 2,
-						(position.Y * 0.5f) - 0.25f + ((float) Math.Floor(size.X / 0.5f) * 0.25f));
+						(position.Y * 0.5f) - 0.25f + ((size.X * 2).FloorToInt() * 0.25f));
 
-		productInfo!.Text = $"{productName}\n" +
-							$"{size.X} x {size.Y} x {size.Z}\n" +
-							$"Shelf {position.X}\n" +
-							$"Spot {position.Y}";
+		productInfo!.Text =
+			$"{productName}\n" +
+			$"{size.X} x {size.Y} x {size.Z}\n" +
+			$"Shelf {position.X}\n" +
+			$"Spot {position.Y}";
 
 		if(!exists) {
 

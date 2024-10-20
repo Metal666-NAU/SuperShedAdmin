@@ -1,50 +1,54 @@
 using Godot;
 
+using Metal666.GodotUtilities.Extensions;
+
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace SuperShedAdmin.Root.BuildingTab;
 
 public partial class BuildingModel : Node3D {
 
+#nullable disable
 	[Export]
-	public virtual Node3D? CameraOrigin { get; set; }
+	public virtual Node3D CameraOrigin { get; set; }
 
 	[Export]
-	public virtual Node3D? CameraPivot { get; set; }
+	public virtual Node3D CameraPivot { get; set; }
 
 	[Export]
-	public virtual Node3D? CameraDolly { get; set; }
+	public virtual Node3D CameraDolly { get; set; }
 
 	[Export]
-	public virtual Node3D? CameraObserveOrigin { get; set; }
+	public virtual Node3D CameraObserveOrigin { get; set; }
 
 	[Export]
-	public virtual Node3D? CameraObservePivot { get; set; }
+	public virtual Node3D CameraObservePivot { get; set; }
 
 	[Export]
-	public virtual Camera3D? Camera { get; set; }
+	public virtual Camera3D Camera { get; set; }
 
 	[Export]
-	public virtual MeshInstance3D? Floor { get; set; }
+	public virtual MeshInstance3D Floor { get; set; }
 
 	[Export]
-	public virtual MeshInstance3D? NorthWall { get; set; }
+	public virtual MeshInstance3D NorthWall { get; set; }
 
 	[Export]
-	public virtual MeshInstance3D? EastWall { get; set; }
+	public virtual MeshInstance3D EastWall { get; set; }
 
 	[Export]
-	public virtual MeshInstance3D? SouthWall { get; set; }
+	public virtual MeshInstance3D SouthWall { get; set; }
 
 	[Export]
-	public virtual MeshInstance3D? WestWall { get; set; }
+	public virtual MeshInstance3D WestWall { get; set; }
 
 	[Export]
-	public virtual Node3D? RackContainer { get; set; }
+	public virtual Node3D RacksContainer { get; set; }
 
 	[Export]
-	public virtual PackedScene? Rack { get; set; }
+	public virtual PackedScene RackScene { get; set; }
 
 	[Export]
 	public virtual float CameraZoomSpeed { get; set; }
@@ -57,6 +61,11 @@ public partial class BuildingModel : Node3D {
 
 	[Export]
 	public virtual float CameraMoveSmoothing { get; set; }
+#nullable enable
+
+	public virtual IEnumerable<Rack.Rack> Racks =>
+		RacksContainer.GetChildren()
+						.Cast<Rack.Rack>();
 
 	public virtual float TargetCameraZoom { get; set; }
 
@@ -72,59 +81,67 @@ public partial class BuildingModel : Node3D {
 
 	public event Action? RackSelected;
 
+	#region Node Events
 	public override void _Ready() {
 
-		TargetCameraZoom = CameraDolly!.Position.Z;
+		TargetCameraZoom = CameraDolly.Position.Z;
 
 	}
+	#endregion
 
 	public override void _Process(double delta) {
 
-		CameraDolly!.Position =
-			CameraDolly.Position.Lerp(new Vector3(0, 0, TargetCameraZoom),
-									CameraZoomSmoothing);
+		CameraDolly.Position =
+			CameraDolly.Position
+						.Lerp(new Vector3(0, 0, TargetCameraZoom),
+								CameraZoomSmoothing);
 
-		CameraOrigin!.Position =
-			CameraOrigin.Position.Lerp(TargetCameraPosition,
-										CameraMoveSmoothing);
+		CameraOrigin.Position =
+			CameraOrigin.Position
+						.Lerp(TargetCameraPosition,
+								CameraMoveSmoothing);
 
 	}
 
 	public virtual void SetSize(Vector3I size) {
 
+		Vector3 halfSize = (Vector3) size / 2f;
+
 		const float wallThickness = 0.1f;
+		const float halfWallThickness = 0.1f / 2;
 
-		(Floor!.Mesh as PlaneMesh)!.Size = new(size.X, size.Z);
+		(Floor.Mesh as PlaneMesh)!.Size = new(size.X, size.Z);
 
-		(NorthWall!.Mesh as BoxMesh)!.Size = new(size.X, size.Y, wallThickness);
-		NorthWall.Position = new(0, size.Y / 2f, -(wallThickness / 2) - size.Z / 2f);
+		(NorthWall.Mesh as BoxMesh)!.Size = new(size.X, size.Y, wallThickness);
+		NorthWall.Position = new(0, halfSize.Y, -halfWallThickness - halfSize.Z);
 
-		(EastWall!.Mesh as BoxMesh)!.Size = new(wallThickness, size.Y, size.Z);
-		EastWall.Position = new((wallThickness / 2) + size.X / 2f, size.Y / 2f, 0);
+		(EastWall.Mesh as BoxMesh)!.Size = new(wallThickness, size.Y, size.Z);
+		EastWall.Position = new(halfWallThickness + halfSize.X, halfSize.Y, 0);
 
-		(SouthWall!.Mesh as BoxMesh)!.Size = new(size.X, size.Y, wallThickness);
-		SouthWall.Position = new(0, size.Y / 2f, (wallThickness / 2) + size.Z / 2f);
+		(SouthWall.Mesh as BoxMesh)!.Size = new(size.X, size.Y, wallThickness);
+		SouthWall.Position = new(0, halfSize.Y, halfWallThickness + halfSize.Z);
 
-		(WestWall!.Mesh as BoxMesh)!.Size = new(wallThickness, size.Y, size.Z);
-		WestWall.Position = new(-(wallThickness / 2) - size.X / 2f, size.Y / 2f, 0);
+		(WestWall.Mesh as BoxMesh)!.Size = new(wallThickness, size.Y, size.Z);
+		WestWall.Position = new(-halfWallThickness - halfSize.X, halfSize.Y, 0);
 
 	}
 
-	public Rack.Rack UpdateRack(string rackId,
-							Vector2I position,
-							Vector2I size,
-							int shelves,
-							float spacing,
-							float rotation,
-							bool isSelected = false) {
+	public virtual Rack.Rack UpdateRack(string rackId,
+										Vector2I position,
+										Vector2I size,
+										int shelves,
+										float spacing,
+										float rotation,
+										bool isSelected = false) {
 
 		Rack.Rack? rack = GetRack(rackId);
 
-		bool exists = rack != null;
+		bool exists =
+			rack != null;
 
 		if(!exists) {
 
-			rack = Rack!.Instantiate<Rack.Rack>();
+			rack = RackScene.Instantiate<Rack.Rack>();
 
 			rack.Id = rackId;
 
@@ -148,23 +165,25 @@ public partial class BuildingModel : Node3D {
 
 						ObservedRack = rackId;
 
-						Vector3 rackRotation = rack.RotationDegrees - new Vector3(0, 90, 0);
+						Vector3 rackRotation =
+							rack.RotationDegrees - new Vector3(0, 90, 0);
 
 						float rackHeight = rack.Shelves * rack.Spacing;
 						float rackWidth = rack.Size.X;
 						float rackLength = rack.Size.Y;
 
-						float cameraTilt = Mathf.DegToRad(-15);
+						float cameraTilt = -15.ToRad();
 
-						CameraObserveOrigin!.Position = rack.Position;
+						CameraObserveOrigin.Position = rack.Position;
 						CameraObserveOrigin.RotationDegrees = rackRotation;
 
-						Camera!.KeepAspect = (rackHeight + rackWidth) >= rackLength ?
-												Camera3D.KeepAspectEnum.Height :
-												Camera3D.KeepAspectEnum.Width;
+						Camera.KeepAspect =
+							(rackHeight + rackWidth) >= rackLength ?
+								Camera3D.KeepAspectEnum.Height :
+								Camera3D.KeepAspectEnum.Width;
 
-						CameraObservePivot!.Position
-							= new(0,
+						CameraObservePivot.Position =
+							new(0,
 										rackHeight,
 										rackHeight / 2 / Mathf.Tan(Mathf.Abs(cameraTilt)));
 
@@ -174,10 +193,10 @@ public partial class BuildingModel : Node3D {
 
 						Camera.Size = Mathf.Max(rackLength, rackHeight) + 1;
 
-						CameraDolly!.RemoveChild(Camera);
+						CameraDolly.RemoveChild(Camera);
 						CameraObservePivot.AddChild(Camera);
 
-						foreach(Rack.Rack otherRack in RackContainer!.GetChildren().Cast<Rack.Rack>()) {
+						foreach(Rack.Rack otherRack in Racks) {
 
 							if(otherRack == rack) {
 
@@ -227,23 +246,23 @@ public partial class BuildingModel : Node3D {
 
 		if(!exists) {
 
-			RackContainer!.AddChild(rack);
+			RacksContainer.AddChild(rack);
 
 		}
 
 		rack.Position = new(position.X, 0, -position.Y);
 		rack.Rotation = new();
-		rack.RotateY(Mathf.DegToRad(rotation));
+		rack.RotateYDeg(rotation);
 
 		return rack;
 
 	}
 
-	public void UpdateProduct(string productId,
-								string rackId,
-								string productName,
-								Vector3 size,
-								Vector2I position) {
+	public virtual void UpdateProduct(string productId,
+										string rackId,
+										string productName,
+										Vector3 size,
+										Vector2I position) {
 
 		Rack.Rack? rack = GetRack(rackId);
 
@@ -260,10 +279,9 @@ public partial class BuildingModel : Node3D {
 	}
 
 	public virtual Rack.Rack? GetRack(string? rackId = null) =>
-		RackContainer!.GetChildren()
-						.Cast<Rack.Rack>()
-						.SingleOrDefault(rack =>
-											rack.Id!.Equals(rackId ?? SelectedRack));
+		Racks.SingleOrDefault(rack =>
+										rack.Id
+											.Equals(rackId ?? SelectedRack));
 
 	public virtual void DeselectRack() {
 
@@ -322,9 +340,9 @@ public partial class BuildingModel : Node3D {
 		}
 
 		TargetCameraPosition -=
-			new Vector3(relativePosition.X, 0, relativePosition.Y)
-			* CameraMoveSpeed
-			* Mathf.Sqrt(TargetCameraZoom);
+			new Vector3(relativePosition.X, 0, relativePosition.Y) *
+				CameraMoveSpeed *
+				Mathf.Sqrt(TargetCameraZoom);
 
 	}
 
@@ -332,15 +350,15 @@ public partial class BuildingModel : Node3D {
 
 		ObservedRack = null;
 
-		Camera!.Projection = Camera3D.ProjectionType.Perspective;
+		Camera.Projection = Camera3D.ProjectionType.Perspective;
 		Camera.KeepAspect = Camera3D.KeepAspectEnum.Height;
 
-		CameraObservePivot!.RemoveChild(Camera);
-		CameraDolly!.AddChild(Camera);
+		CameraObservePivot.RemoveChild(Camera);
+		CameraDolly.AddChild(Camera);
 
 		CameraObservePivot.RotationDegrees = new();
 
-		foreach(Rack.Rack rack in RackContainer!.GetChildren().Cast<Rack.Rack>()) {
+		foreach(Rack.Rack rack in Racks) {
 
 			rack.SetHidden(false);
 

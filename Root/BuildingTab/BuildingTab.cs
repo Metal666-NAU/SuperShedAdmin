@@ -1,5 +1,7 @@
 using Godot;
 
+using Metal666.GodotUtilities.Extensions;
+
 using Net.Codecrete.QrCodeGenerator;
 
 using SuperShedAdmin.Networking;
@@ -13,111 +15,125 @@ namespace SuperShedAdmin.Root.BuildingTab;
 
 public partial class BuildingTab : Control {
 
+#nullable disable
 	[Export]
-	public virtual Button? PrimaryViewButton { get; set; }
-
-	[Export]
-	public virtual Button? SecondaryViewButton { get; set; }
+	public virtual Button PrimaryViewButton { get; set; }
 
 	[Export]
-	public virtual Panel? PrimaryView { get; set; }
+	public virtual Button SecondaryViewButton { get; set; }
 
 	[Export]
-	public virtual Viewport? BuildingModelViewport { get; set; }
+	public virtual Panel PrimaryView { get; set; }
 
 	[Export]
-	public virtual BuildingModel? BuildingModel { get; set; }
+	public virtual Viewport BuildingModelViewport { get; set; }
 
 	[Export]
-	public virtual Button? StopObservingRackButton { get; set; }
+	public virtual BuildingModel BuildingModel { get; set; }
 
 	[Export]
-	public virtual Panel? RackSettingsPanel { get; set; }
+	public virtual Button StopObservingRackButton { get; set; }
 
 	[Export]
-	public virtual LineEdit? RackIdOutput { get; set; }
+	public virtual Panel RackSettingsPanel { get; set; }
 
 	[Export]
-	public virtual SpinBox? RackXInput { get; set; }
+	public virtual LineEdit RackIdOutput { get; set; }
 
 	[Export]
-	public virtual SpinBox? RackZInput { get; set; }
+	public virtual SpinBox RackXInput { get; set; }
 
 	[Export]
-	public virtual SpinBox? RackWidthInput { get; set; }
+	public virtual SpinBox RackZInput { get; set; }
 
 	[Export]
-	public virtual SpinBox? RackLengthInput { get; set; }
+	public virtual SpinBox RackWidthInput { get; set; }
 
 	[Export]
-	public virtual SpinBox? RackShelvesInput { get; set; }
+	public virtual SpinBox RackLengthInput { get; set; }
 
 	[Export]
-	public virtual SpinBox? RackSpacingInput { get; set; }
+	public virtual SpinBox RackShelvesInput { get; set; }
 
 	[Export]
-	public virtual SpinBox? RackRotationInput { get; set; }
+	public virtual SpinBox RackSpacingInput { get; set; }
 
 	[Export]
-	public virtual Button? SaveRackSettingsButton { get; set; }
+	public virtual SpinBox RackRotationInput { get; set; }
 
 	[Export]
-	public virtual Button? DeleteRackButton { get; set; }
+	public virtual Button SaveRackSettingsButton { get; set; }
 
 	[Export]
-	public virtual Panel? SecondaryView { get; set; }
+	public virtual Button DeleteRackButton { get; set; }
 
 	[Export]
-	public virtual PopupMenu? GroupByPopup { get; set; }
+	public virtual Panel SecondaryView { get; set; }
 
 	[Export]
-	public virtual Tree? ProductsTree { get; set; }
+	public virtual PopupMenu GroupByPopup { get; set; }
 
 	[Export]
-	public virtual VBoxContainer? ProductQRCodePanel { get; set; }
+	public virtual Godot.Tree ProductsTree { get; set; }
 
 	[Export]
-	public virtual TextureRect? ProductQRCodeTexture { get; set; }
+	public virtual VBoxContainer ProductQRCodePanel { get; set; }
 
 	[Export]
-	public virtual LineEdit? ProductIdOutput { get; set; }
+	public virtual TextureRect ProductQRCodeTexture { get; set; }
 
 	[Export]
-	public virtual SpinBox? BuildingWidthInput { get; set; }
+	public virtual LineEdit ProductIdOutput { get; set; }
 
 	[Export]
-	public virtual SpinBox? BuildingLengthInput { get; set; }
+	public virtual SpinBox BuildingWidthInput { get; set; }
 
 	[Export]
-	public virtual SpinBox? BuildingHeightInput { get; set; }
+	public virtual SpinBox BuildingLengthInput { get; set; }
 
 	[Export]
-	public virtual Button? EditBuildingSizeButton { get; set; }
+	public virtual SpinBox BuildingHeightInput { get; set; }
 
 	[Export]
-	public virtual Button? SaveBuildingSizeButton { get; set; }
+	public virtual Button EditBuildingSizeButton { get; set; }
 
 	[Export]
-	public virtual Button? CancelEditingBuildingSizeButton { get; set; }
+	public virtual Button SaveBuildingSizeButton { get; set; }
 
-	public virtual Building? Building { get; set; }
+	[Export]
+	public virtual Button CancelEditingBuildingSizeButton { get; set; }
 
-	public virtual Dictionary<string, (Vector2I Position, Vector2I Size, int Shelves, float Spacing, float Rotation)> Racks { get; set; }
-		= new();
-	public virtual Dictionary<string, (Vector3 Size, string Manufacturer, string RackId, Vector2I Position, string Name, string Category)> Products { get; set; }
-		= new();
+	public virtual Building Building { get; set; }
+#nullable enable
+
+	public virtual Vector3I BuildingSize =>
+		new Vector3(BuildingWidthInput.ValueF(),
+					BuildingHeightInput.ValueF(),
+					BuildingLengthInput.ValueF()).RoundToInt();
+	public virtual Vector2I RackPosition =>
+		new Vector2(RackXInput.ValueF(),
+					RackZInput.ValueF()).RoundToInt();
+	public virtual Vector2I RackSize =>
+		new Vector2(RackWidthInput.ValueF(),
+					RackLengthInput.ValueF()).RoundToInt();
+
+	public virtual Dictionary<string, RackData> Racks { get; set; } =
+		[];
+	public virtual Dictionary<string, ProductData> Products { get; set; } =
+		[];
 
 	public virtual ProductGroups GroupProductsBy { get; set; }
 
 	public virtual bool ReallyWantsToDeleteRack { get; set; }
 
+	#region Signal Handlers
 	public virtual void OnViewToggled(bool primaryView) {
 
-		PrimaryViewButton!.ButtonPressed = primaryView;
-		SecondaryViewButton!.ButtonPressed = !primaryView;
+		PrimaryViewButton.ButtonPressed = primaryView;
+		SecondaryViewButton.ButtonPressed = !primaryView;
 
-		PrimaryView!.Visible = primaryView;
-		SecondaryView!.Visible = !primaryView;
+		PrimaryView.Visible = primaryView;
+		SecondaryView.Visible = !primaryView;
 
 	}
 
@@ -129,7 +145,7 @@ public partial class BuildingTab : Control {
 
 				case MouseButton.WheelUp: {
 
-					BuildingModel!.Zoom(true);
+					BuildingModel.Zoom(true);
 
 					break;
 
@@ -137,7 +153,7 @@ public partial class BuildingTab : Control {
 
 				case MouseButton.WheelDown: {
 
-					BuildingModel!.Zoom(false);
+					BuildingModel.Zoom(false);
 
 					break;
 
@@ -145,7 +161,7 @@ public partial class BuildingTab : Control {
 
 				case MouseButton.Middle: {
 
-					BuildingModel!.ToggleGrabCamera();
+					BuildingModel.ToggleGrabCamera();
 
 					if(inputEventMouseButton.Pressed) {
 
@@ -169,21 +185,20 @@ public partial class BuildingTab : Control {
 
 		if(inputEvent is InputEventMouseMotion inputEventMouseMotion) {
 
-			BuildingModel!.MoveCamera(inputEventMouseMotion.Relative);
+			BuildingModel.MoveCamera(inputEventMouseMotion.Relative);
 
 		}
 
 	}
 
 	public virtual void OnCreateRackButtonPressed() =>
-		Client.SendCreateRack(Building!.Id);
+		Client.SendCreateRack(Building.Id);
 
 	public virtual void OnBuildingSizeChanged(float _) {
 
-		SaveBuildingSizeButton!.Disabled =
-			Building!.Size.Equals(new(Mathf.RoundToInt(BuildingWidthInput!.Value),
-													Mathf.RoundToInt(BuildingHeightInput!.Value),
-													Mathf.RoundToInt(BuildingLengthInput!.Value)));
+		SaveBuildingSizeButton.Disabled =
+			Building.Size
+					.Equals(BuildingSize);
 
 	}
 
@@ -192,22 +207,24 @@ public partial class BuildingTab : Control {
 
 	public virtual void OnSaveBuildingSizeButtonPressed() {
 
-		Vector3I buildingSize =
-			new(Mathf.RoundToInt(BuildingWidthInput!.Value),
-						Mathf.RoundToInt(BuildingHeightInput!.Value),
-						Mathf.RoundToInt(BuildingLengthInput!.Value));
+		Vector3I buildingSize = BuildingSize;
 
-		Client.SendUpdateBuilding(Building!.Id,
-									Building!.Name,
+		Client.SendUpdateBuilding(Building.Id,
+									Building.Name,
 									buildingSize.X,
 									buildingSize.Z,
 									buildingSize.Y);
 
 		ToggleBuildingSizeEditing(false);
 
-		Building = Building with { Size = buildingSize };
+		Building =
+			Building with {
 
-		BuildingModel!.SetSize(buildingSize);
+				Size = buildingSize
+
+			};
+
+		BuildingModel.SetSize(buildingSize);
 
 	}
 
@@ -221,7 +238,7 @@ public partial class BuildingTab : Control {
 
 	public virtual void OnRackSettingsChanged(float _) {
 
-		string? selectedRack = BuildingModel!.SelectedRack;
+		string? selectedRack = BuildingModel.SelectedRack;
 
 		if(selectedRack == null) {
 
@@ -231,23 +248,21 @@ public partial class BuildingTab : Control {
 
 		}
 
-		(Vector2I Position, Vector2I Size, int Shelves, float Spacing, float Rotation)
-			= Racks[selectedRack];
+		(Vector2I Position, Vector2I Size, int Shelves, float Spacing, float Rotation) =
+			Racks[selectedRack];
 
-		Vector2I inputPosition = new(Mathf.RoundToInt(RackXInput!.Value),
-											Mathf.RoundToInt(RackZInput!.Value));
-		Vector2I inputSize = new(Mathf.RoundToInt(RackWidthInput!.Value),
-										Mathf.RoundToInt(RackLengthInput!.Value));
-		int inputShelves = Mathf.RoundToInt(RackShelvesInput!.Value);
-		float inputSpacing = (float) RackSpacingInput!.Value;
-		float inputRotation = (float) RackRotationInput!.Value;
+		Vector2I inputPosition = RackPosition;
+		Vector2I inputSize = RackSize;
+		int inputShelves = RackShelvesInput.ValueI();
+		float inputSpacing = RackSpacingInput.ValueF();
+		float inputRotation = RackRotationInput.ValueF();
 
-		SaveRackSettingsButton!.Disabled =
+		SaveRackSettingsButton.Disabled =
 			Position.Equals(inputPosition) &&
-			Size.Equals(inputSize) &&
-			Shelves.Equals(inputShelves) &&
-			Spacing.Equals(inputSpacing) &&
-			Rotation.Equals(inputRotation);
+				Size.Equals(inputSize) &&
+				Shelves.Equals(inputShelves) &&
+				Spacing.Equals(inputSpacing) &&
+				Rotation.Equals(inputRotation);
 
 		BuildingModel.UpdateRack(selectedRack,
 									inputPosition,
@@ -261,27 +276,30 @@ public partial class BuildingTab : Control {
 
 	public virtual void OnSaveRackSettingsButtonPressed() {
 
-		Client.SendUpdateRack(BuildingModel!.SelectedRack!,
-								Mathf.RoundToInt(RackXInput!.Value),
-								Mathf.RoundToInt(RackZInput!.Value),
-								Mathf.RoundToInt(RackWidthInput!.Value),
-								Mathf.RoundToInt(RackLengthInput!.Value),
-								Mathf.RoundToInt(RackShelvesInput!.Value),
-								(float) RackSpacingInput!.Value,
-								(float) RackRotationInput!.Value);
+		Vector2I inputPosition = RackPosition;
+		Vector2I inputSize = RackSize;
 
-		BuildingModel!.DeselectRack();
+		Client.SendUpdateRack(BuildingModel.SelectedRack!,
+								inputPosition.X,
+								inputPosition.Y,
+								inputSize.X,
+								inputSize.Y,
+								RackShelvesInput.ValueI(),
+								RackSpacingInput.ValueF(),
+								RackRotationInput.ValueF());
 
-		RackSettingsPanel!.Hide();
+		BuildingModel.DeselectRack();
+
+		RackSettingsPanel.Hide();
 
 	}
 
 	public virtual void OnCancelEditingRackSettingsButtonPressed() {
 
-		RackSettingsPanel!.Hide();
+		RackSettingsPanel.Hide();
 
-		(Vector2I Position, Vector2I Size, int Shelves, float Spacing, float Rotation)
-			= Racks[BuildingModel!.SelectedRack!];
+		(Vector2I Position, Vector2I Size, int Shelves, float Spacing, float Rotation) =
+			Racks[BuildingModel.SelectedRack!];
 
 		Rack.Rack rack =
 			BuildingModel.UpdateRack(BuildingModel.SelectedRack!,
@@ -292,9 +310,16 @@ public partial class BuildingTab : Control {
 										Rotation,
 										false);
 
-		foreach(KeyValuePair<string, (Vector3 Size, string Manufacturer, string RackId, Vector2I Position, string Name, string Category)> product in Products.Where(product => product.Value.RackId.Equals(BuildingModel.SelectedRack))) {
+		foreach(KeyValuePair<string, ProductData> product in
+					Products.Where(product =>
+												product.Value
+														.RackId
+														.Equals(BuildingModel.SelectedRack))) {
 
-			rack.UpdateProduct(product.Key, product.Value.Name, product.Value.Size, product.Value.Position);
+			rack.UpdateProduct(product.Key,
+								product.Value.Name,
+								product.Value.Size,
+								product.Value.Position);
 
 		}
 
@@ -306,9 +331,9 @@ public partial class BuildingTab : Control {
 
 		if(ReallyWantsToDeleteRack) {
 
-			Client.SendDeleteRack(BuildingModel!.SelectedRack!);
+			Client.SendDeleteRack(BuildingModel.SelectedRack!);
 
-			RackSettingsPanel!.Hide();
+			RackSettingsPanel.Hide();
 
 			return;
 
@@ -316,15 +341,15 @@ public partial class BuildingTab : Control {
 
 		ReallyWantsToDeleteRack = true;
 
-		DeleteRackButton!.Text = "Delete! :O";
+		DeleteRackButton.Text = "Delete! :O";
 
 	}
 
 	public virtual void OnStopObservingRackButtonPressed() {
 
-		StopObservingRackButton!.Hide();
+		StopObservingRackButton.Hide();
 
-		BuildingModel!.StopObservingRack();
+		BuildingModel.StopObservingRack();
 
 	}
 
@@ -334,7 +359,7 @@ public partial class BuildingTab : Control {
 
 		UpdateProductsTree();
 
-		for(int i = 0; i < GroupByPopup!.ItemCount; i++) {
+		for(int i = 0; i < GroupByPopup.ItemCount; i++) {
 
 			GroupByPopup.SetItemChecked(i, false);
 
@@ -345,67 +370,71 @@ public partial class BuildingTab : Control {
 		UpdateGroupByPopupName();
 
 	}
+	#endregion
 
+	#region Node Events
 	public override void _Ready() {
 
 		ResetBuildingSizeInputs();
 
-		BuildingModel!.SetSize(Building!.Size);
+		BuildingModel.SetSize(Building.Size);
 
-		RackSettingsPanel!.Hide();
+		RackSettingsPanel.Hide();
 
 		BuildingModel.RackSelected += () => {
 
-			RackSettingsPanel!.Show();
+			RackSettingsPanel.Show();
 
 			ReallyWantsToDeleteRack = false;
 
-			DeleteRackButton!.Text = "Delete?";
+			DeleteRackButton.Text = "Delete?";
 
-			(Vector2I Position, Vector2I Size, int Shelves, float Spacing, float Rotation) =
-				Racks[BuildingModel!.SelectedRack!];
+			RackData rackData =
+				Racks[BuildingModel.SelectedRack!];
 
-			RackIdOutput!.Text = BuildingModel.SelectedRack;
+			RackIdOutput.Text = BuildingModel.SelectedRack;
 
-			RackXInput!.SetValueNoSignal(Position.X);
-			RackZInput!.SetValueNoSignal(Position.Y);
+			RackXInput.SetValueNoSignal(rackData.Position.X);
+			RackZInput.SetValueNoSignal(rackData.Position.Y);
 
-			RackWidthInput!.SetValueNoSignal(Size.X);
-			RackLengthInput!.SetValueNoSignal(Size.Y);
+			RackWidthInput.SetValueNoSignal(rackData.Size.X);
+			RackLengthInput.SetValueNoSignal(rackData.Size.Y);
 
-			RackShelvesInput!.SetValueNoSignal(Shelves);
-			RackSpacingInput!.SetValueNoSignal(Spacing);
+			RackShelvesInput.SetValueNoSignal(rackData.Shelves);
+			RackSpacingInput.SetValueNoSignal(rackData.Spacing);
 
-			RackRotationInput!.SetValueNoSignal(Rotation);
+			RackRotationInput.SetValueNoSignal(rackData.Rotation);
 
 		};
 
-		BuildingModel.RackObserved += () => StopObservingRackButton!.Show();
+		BuildingModel.RackObserved +=
+			StopObservingRackButton.Show;
 
 		UpdateGroupByPopupName();
 
 	}
+	#endregion
 
 	public virtual void ToggleBuildingSizeEditing(bool editing) {
 
-		EditBuildingSizeButton!.Visible = !editing;
+		EditBuildingSizeButton.Visible = !editing;
 
-		SaveBuildingSizeButton!.Visible = editing;
-		CancelEditingBuildingSizeButton!.Visible = editing;
+		SaveBuildingSizeButton.Visible = editing;
+		CancelEditingBuildingSizeButton.Visible = editing;
 
 		SaveBuildingSizeButton.Disabled = true;
 
-		BuildingWidthInput!.Editable = editing;
-		BuildingLengthInput!.Editable = editing;
-		BuildingHeightInput!.Editable = editing;
+		BuildingWidthInput.Editable = editing;
+		BuildingLengthInput.Editable = editing;
+		BuildingHeightInput.Editable = editing;
 
 	}
 
 	public virtual void ResetBuildingSizeInputs() {
 
-		BuildingWidthInput!.Value = Building!.Size.X;
-		BuildingLengthInput!.Value = Building!.Size.Z;
-		BuildingHeightInput!.Value = Building!.Size.Y;
+		BuildingWidthInput.Value = Building.Size.X;
+		BuildingLengthInput.Value = Building.Size.Z;
+		BuildingHeightInput.Value = Building.Size.Y;
 
 	}
 
@@ -416,13 +445,31 @@ public partial class BuildingTab : Control {
 									float spacing,
 									float rotation) {
 
-		Racks[rackId] = (position, size, shelves, spacing, rotation);
+		Racks[rackId] =
+			new(position,
+						size,
+						shelves,
+						spacing,
+						rotation);
 
-		Rack.Rack rack = BuildingModel!.UpdateRack(rackId, position, size, shelves, spacing, rotation);
+		Rack.Rack rack =
+			BuildingModel.UpdateRack(rackId,
+										position,
+										size,
+										shelves,
+										spacing,
+										rotation);
 
-		foreach(KeyValuePair<string, (Vector3 Size, string Manufacturer, string RackId, Vector2I Position, string Name, string Category)> product in Products.Where(product => product.Value.RackId.Equals(rackId))) {
+		foreach(KeyValuePair<string, ProductData> product in
+					Products.Where(product =>
+												product.Value
+														.RackId
+														.Equals(rackId))) {
 
-			rack.UpdateProduct(product.Key, product.Value.Name, product.Value.Size, product.Value.Position);
+			rack.UpdateProduct(product.Key,
+								product.Value.Name,
+								product.Value.Size,
+								product.Value.Position);
 
 		}
 
@@ -436,13 +483,19 @@ public partial class BuildingTab : Control {
 										string productName,
 										string productCategory) {
 
-		Products[productId] = (productSize, productManufacturer, rackId, productPosition, productName, productCategory);
+		Products[productId] =
+			new(productSize,
+							productManufacturer,
+							rackId,
+							productPosition,
+							productName,
+							productCategory);
 
-		BuildingModel!.UpdateProduct(productId,
-										rackId,
-										productName,
-										productSize,
-										productPosition);
+		BuildingModel.UpdateProduct(productId,
+									rackId,
+									productName,
+									productSize,
+									productPosition);
 
 		UpdateProductsTree();
 
@@ -452,13 +505,13 @@ public partial class BuildingTab : Control {
 
 		Racks.Remove(rackId);
 
-		BuildingModel!.RemoveRack(rackId);
+		BuildingModel.RemoveRack(rackId);
 
 	}
 
 	public virtual void UpdateProductsTree() {
 
-		ProductsTree!.Clear();
+		ProductsTree.Clear();
 
 		ProductsTree.CreateItem();
 
@@ -494,81 +547,52 @@ public partial class BuildingTab : Control {
 
 		}
 
-		List<TreeItem> groupItems = Products.Values.Select(productInfo => {
+		List<TreeItem> groupItems =
+			Products.Values
+					.Select(productInfo =>
+										GroupProductsBy switch {
 
-			switch(GroupProductsBy) {
+											ProductGroups.Category => productInfo.Category,
+											ProductGroups.Manufacturer => productInfo.Manufacturer,
+											_ => productInfo.Name
 
-				case ProductGroups.Category: {
+										})
+					.Distinct()
+					.Select(group => {
 
-					return productInfo.Category;
+						TreeItem treeItem = ProductsTree.CreateItem();
 
-				}
+						treeItem.SetText(0, group);
 
-				case ProductGroups.Manufacturer: {
+						return treeItem;
 
-					return productInfo.Manufacturer;
+					}).ToList();
 
-				}
+		foreach(KeyValuePair<string, ProductData> product in Products) {
 
-			}
+			TreeItem treeItem =
+				ProductsTree.CreateItem(groupItems.Single(groupItem =>
+																			groupItem.GetText(0)
+																						.Equals(GroupProductsBy switch {
 
-			return productInfo.Name;
+																							ProductGroups.Category =>
+																								product.Value.Category,
+																							ProductGroups.Manufacturer =>
+																								product.Value.Manufacturer,
+																							_ => null
 
-		}).Distinct().Select(group => {
-
-			TreeItem treeItem = ProductsTree.CreateItem();
-
-			treeItem.SetText(0, group);
-
-			return treeItem;
-
-		}).ToList();
-
-		foreach(KeyValuePair<string, (Vector3 Size, string Manufacturer, string RackId, Vector2I Position, string Name, string Category)> product in Products) {
-
-			TreeItem treeItem = ProductsTree.CreateItem(groupItems.Single(groupItem => {
-
-				switch(GroupProductsBy) {
-
-					case ProductGroups.Category: {
-
-						return groupItem.GetText(0).Equals(product.Value.Category);
-
-					}
-
-					case ProductGroups.Manufacturer: {
-
-						return groupItem.GetText(0).Equals(product.Value.Manufacturer);
-
-					}
-
-				}
-
-				return false;
-
-			}));
+																						})));
 
 			treeItem.SetText(0, product.Value.Name);
 
-			switch(GroupProductsBy) {
+			treeItem.SetText(1,
+								GroupProductsBy switch {
 
-				case ProductGroups.Category: {
+									ProductGroups.Category => product.Value.Manufacturer,
+									ProductGroups.Manufacturer => product.Value.Category,
+									_ => ""
 
-					treeItem.SetText(1, product.Value.Manufacturer);
-
-					break;
-
-				}
-
-				case ProductGroups.Manufacturer: {
-
-					treeItem.SetText(1, product.Value.Category);
-
-					break;
-
-				}
-
-			}
+								});
 
 			Vector3 size = product.Value.Size;
 
@@ -591,7 +615,7 @@ public partial class BuildingTab : Control {
 
 			if(groupItems.Contains(selectedItem)) {
 
-				ProductQRCodePanel!.Hide();
+				ProductQRCodePanel.Hide();
 
 				return;
 
@@ -609,7 +633,11 @@ public partial class BuildingTab : Control {
 
 			int size = qrCode.Size + 4;
 
-			Image qrCodeImage = Image.Create(size, size, false, Image.Format.L8);
+			Image qrCodeImage =
+				Image.CreateEmpty(size,
+									size,
+									false,
+									Image.Format.L8);
 
 			qrCodeImage.Fill(Colors.White);
 
@@ -627,22 +655,37 @@ public partial class BuildingTab : Control {
 
 			}
 
-			ProductQRCodeTexture!.Texture = ImageTexture.CreateFromImage(qrCodeImage);
+			ProductQRCodeTexture.Texture = ImageTexture.CreateFromImage(qrCodeImage);
 
 			ProductQRCodeTexture.TextureFilter = TextureFilterEnum.Nearest;
 
-			ProductQRCodePanel!.Show();
+			ProductQRCodePanel.Show();
 
-			ProductIdOutput!.Text = productId;
+			ProductIdOutput.Text = productId;
 
 		};
 
-		ProductsTree.EmptyClicked += (position, mouseButtonIndex) => ProductQRCodePanel!.Hide();
+		ProductsTree.EmptyClicked +=
+			(position, mouseButtonIndex) =>
+				ProductQRCodePanel.Hide();
 
 	}
 
 	public virtual void UpdateGroupByPopupName() =>
-		GroupByPopup!.Name = $"Group By {GroupProductsBy}";
+		GroupByPopup.Name = $"Group By {GroupProductsBy}";
+
+	public record RackData(Vector2I Position,
+							Vector2I Size,
+							int Shelves,
+							float Spacing,
+							float Rotation);
+
+	public record ProductData(Vector3 Size,
+								string Manufacturer,
+								string RackId,
+								Vector2I Position,
+								string Name,
+								string Category);
 
 	public enum ProductGroups {
 

@@ -7,8 +7,10 @@ namespace SuperShedAdmin.Root;
 
 public partial class PromptBarrier : Panel {
 
+#nullable disable
 	[Export]
-	public virtual Array<PanelContainer>? Prompts { get; set; }
+	public virtual Array<PanelContainer> Prompts { get; set; }
+#nullable enable
 
 	public virtual TPrompt ShowPrompt<TPrompt>()
 		where TPrompt : PanelContainer {
@@ -24,13 +26,15 @@ public partial class PromptBarrier : Panel {
 	}
 
 	public virtual TPrompt GetPrompt<TPrompt>()
-		where TPrompt : PanelContainer => Prompts!.OfType<TPrompt>().Single();
+		where TPrompt : PanelContainer =>
+			Prompts.OfType<TPrompt>()
+					.Single();
 
 	public virtual void HidePrompt() {
 
 		Hide();
 
-		foreach(PanelContainer promptControl in Prompts!) {
+		foreach(PanelContainer promptControl in Prompts) {
 
 			promptControl.Hide();
 

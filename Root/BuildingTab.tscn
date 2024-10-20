@@ -150,7 +150,7 @@ stretch = true
 [node name="BuildingModelViewport" type="SubViewport" parent="VBoxContainer/PrimaryView/MarginContainer/BuildingModelViewportContainer"]
 handle_input_locally = false
 physics_object_picking = true
-size = Vector2i(2, 2)
+size = Vector2i(1142, 598)
 render_target_update_mode = 4
 
 [node name="BuildingModelRoot" type="Node3D" parent="VBoxContainer/PrimaryView/MarginContainer/BuildingModelViewportContainer/BuildingModelViewport"]
@@ -161,7 +161,7 @@ shadow_enabled = true
 shadow_blur = 0.3
 directional_shadow_max_distance = 50.0
 
-[node name="BuildingModel" type="Node3D" parent="VBoxContainer/PrimaryView/MarginContainer/BuildingModelViewportContainer/BuildingModelViewport/BuildingModelRoot" node_paths=PackedStringArray("CameraOrigin", "CameraPivot", "CameraDolly", "CameraObserveOrigin", "CameraObservePivot", "Camera", "Floor", "NorthWall", "EastWall", "SouthWall", "WestWall", "RackContainer")]
+[node name="BuildingModel" type="Node3D" parent="VBoxContainer/PrimaryView/MarginContainer/BuildingModelViewportContainer/BuildingModelViewport/BuildingModelRoot" node_paths=PackedStringArray("CameraOrigin", "CameraPivot", "CameraDolly", "CameraObserveOrigin", "CameraObservePivot", "Camera", "Floor", "NorthWall", "EastWall", "SouthWall", "WestWall", "RacksContainer")]
 script = ExtResource("2_33k60")
 CameraOrigin = NodePath("CameraOrigin")
 CameraPivot = NodePath("CameraOrigin/CameraPivot")
@@ -174,8 +174,8 @@ NorthWall = NodePath("Walls/NorthWall")
 EastWall = NodePath("Walls/EastWall")
 SouthWall = NodePath("Walls/SouthWall")
 WestWall = NodePath("Walls/WestWall")
-RackContainer = NodePath("RackContainer")
-Rack = ExtResource("3_e0s76")
+RacksContainer = NodePath("RacksContainer")
+RackScene = ExtResource("3_e0s76")
 CameraZoomSpeed = 0.75
 CameraZoomSmoothing = 0.5
 CameraMoveSpeed = 0.01
@@ -223,7 +223,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 1, 0)
 mesh = SubResource("BoxMesh_nju1i")
 skeleton = NodePath("../EastWall")
 
-[node name="RackContainer" type="Node3D" parent="VBoxContainer/PrimaryView/MarginContainer/BuildingModelViewportContainer/BuildingModelViewport/BuildingModelRoot/BuildingModel"]
+[node name="RacksContainer" type="Node3D" parent="VBoxContainer/PrimaryView/MarginContainer/BuildingModelViewportContainer/BuildingModelViewport/BuildingModelRoot/BuildingModel"]
 
 [node name="RackSettingsPanel" type="Panel" parent="VBoxContainer/PrimaryView/MarginContainer"]
 custom_minimum_size = Vector2(300, 0)
@@ -379,8 +379,8 @@ mouse_filter = 1
 
 [node name="DeleteRackButton" type="Button" parent="VBoxContainer/PrimaryView/MarginContainer/RackSettingsPanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.85, 0.187708, 0.1275, 1)
 theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_color = Color(0.85, 0.187708, 0.1275, 1)
 theme_override_styles/pressed = SubResource("StyleBoxFlat_uuqwm")
 text = "Delete :O"
 
@@ -422,7 +422,6 @@ item_count = 2
 item_0/text = "Category"
 item_0/checkable = 2
 item_0/checked = true
-item_0/id = 0
 item_1/text = "Manufacturer"
 item_1/checkable = 2
 item_1/id = 1

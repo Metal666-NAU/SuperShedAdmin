@@ -1,5 +1,7 @@
 using Godot;
 
+using Metal666.GodotUtilities.Extensions;
+
 using SuperShedAdmin.Networking;
 
 using System;
@@ -10,54 +12,61 @@ namespace SuperShedAdmin.Root;
 
 public partial class Root : Node {
 
+#nullable disable
 	[Export]
-	public virtual Label? ConnectionStatusLabel { get; set; }
-
-	[Export]
-	public virtual Button? ConnectionActionButton { get; set; }
+	public virtual Label ConnectionStatusLabel { get; set; }
 
 	[Export]
-	public virtual TabContainer? BuildingsTabContainer { get; set; }
+	public virtual Button ConnectionActionButton { get; set; }
 
 	[Export]
-	public virtual PackedScene? BuildingTab { get; set; }
+	public virtual TabContainer BuildingTabsContainer { get; set; }
 
 	[Export]
-	public virtual Button? ShowWorkersButton { get; set; }
+	public virtual PackedScene BuildingTabScene { get; set; }
 
 	[Export]
-	public virtual Panel? WorkersPanel { get; set; }
+	public virtual Button ShowWorkersButton { get; set; }
 
 	[Export]
-	public virtual ItemList? OnlineWorkersList { get; set; }
+	public virtual Panel WorkersPanel { get; set; }
 
 	[Export]
-	public virtual PopupMenu? OnlineWorkerPopupMenu { get; set; }
+	public virtual ItemList OnlineWorkersList { get; set; }
 
 	[Export]
-	public virtual ItemList? OfflineWorkersList { get; set; }
+	public virtual PopupMenu OnlineWorkerPopupMenu { get; set; }
 
 	[Export]
-	public virtual PopupMenu? OfflineWorkerPopupMenu { get; set; }
+	public virtual ItemList OfflineWorkersList { get; set; }
 
 	[Export]
-	public virtual Label? WorkerStats { get; set; }
+	public virtual PopupMenu OfflineWorkerPopupMenu { get; set; }
 
 	[Export]
-	public virtual ItemList? LogsList { get; set; }
+	public virtual Label WorkerStats { get; set; }
 
 	[Export]
-	public virtual LoadingBarrier? LoadingBarrier { get; set; }
+	public virtual ItemList LogsList { get; set; }
 
 	[Export]
-	public virtual PromptBarrier? PromptBarrier { get; set; }
+	public virtual LoadingBarrier LoadingBarrier { get; set; }
 
-	public virtual List<Worker> Workers { get; set; } = new();
-	public virtual List<Building> Buildings { get; set; } = new();
+	[Export]
+	public virtual PromptBarrier PromptBarrier { get; set; }
+#nullable enable
 
+	public virtual IEnumerable<BuildingTab.BuildingTab> BuildingTabs =>
+		BuildingTabsContainer.GetChildren()
+								.Cast<BuildingTab.BuildingTab>();
+
+	public virtual List<Worker> Workers { get; set; } = [];
+	public virtual List<Building> Buildings { get; set; } = [];
+
+	#region Signal Handlers
 	public virtual void OnLoginCredentialsSubmitted(string username, string password) {
 
-		LoadingBarrier!.ShowBarrier("Logging in...");
+		LoadingBarrier.ShowBarrier("Logging in...");
 
 		Client.Authenticate(username, password);
 
@@ -65,19 +74,31 @@ public partial class Root : Node {
 
 	public virtual void OnWorkersPanelToggled(bool open) {
 
-		WorkersPanel!.Visible = open;
+		WorkersPanel.Visible = open;
 
-		ShowWorkersButton!.Visible = !open;
+		ShowWorkersButton.Visible = !open;
 
 	}
 
 	public virtual void OnOnlineWorkerClicked(int index, Vector2 position, int mouseButton) =>
-		OnWorkerClicked(OnlineWorkersList!, OnlineWorkerPopupMenu!, index, position, mouseButton);
+		OnWorkerClicked(OnlineWorkersList,
+						OnlineWorkerPopupMenu,
+						index,
+						position,
+						mouseButton);
 
 	public virtual void OnOfflineWorkerClicked(int index, Vector2 position, int mouseButton) =>
-		OnWorkerClicked(OfflineWorkersList!, OfflineWorkerPopupMenu!, index, position, mouseButton);
+		OnWorkerClicked(OfflineWorkersList,
+						OfflineWorkerPopupMenu,
+						index,
+						position,
+						mouseButton);
 
-	public virtual void OnWorkerClicked(ItemList workerList, PopupMenu popupMenu, int index, Vector2 position, int mouseButton) {
+	public virtual void OnWorkerClicked(ItemList workerList,
+										PopupMenu popupMenu,
+										int index,
+										Vector2 position,
+										int mouseButton) {
 
 		if(mouseButton != (int) MouseButton.Right) {
 
@@ -85,10 +106,11 @@ public partial class Root : Node {
 
 		}
 
-		popupMenu!.Position = new Vector2I(Mathf.RoundToInt(position.X + workerList.GlobalPosition.X),
-											Mathf.RoundToInt(position.Y + workerList.GlobalPosition.Y));
+		popupMenu.Position =
+			new Vector2(position.X + workerList.GlobalPosition.X,
+						position.Y + workerList.GlobalPosition.Y).RoundToInt();
 
-		popupMenu.SetMeta("workerId", workerList!.GetItemMetadata(index).AsString());
+		popupMenu.SetMeta("workerId", workerList.GetItemMetadata(index).AsString());
 
 		popupMenu.Popup();
 
@@ -100,7 +122,7 @@ public partial class Root : Node {
 
 			case 0: {
 
-				Client.SendRevokeWorkerAuth(OnlineWorkerPopupMenu!.GetMeta("workerId").AsString());
+				Client.SendRevokeWorkerAuth(OnlineWorkerPopupMenu.GetMeta("workerId").AsString());
 
 				break;
 
@@ -116,9 +138,9 @@ public partial class Root : Node {
 
 			case 0: {
 
-				PromptBarrier!.ShowPrompt<WorkerLoginPrompt>().SetLoginCode("Generating Login Code...");
+				PromptBarrier.ShowPrompt<WorkerLoginPrompt>().SetLoginCode("Generating Login Code...");
 
-				Client.SendStartWorkerAuth(OfflineWorkerPopupMenu!.GetMeta("workerId").AsString());
+				Client.SendStartWorkerAuth(OfflineWorkerPopupMenu.GetMeta("workerId").AsString());
 
 				break;
 
@@ -126,7 +148,7 @@ public partial class Root : Node {
 
 			case 1: {
 
-				Client.SendRevokeWorkerAuth(OfflineWorkerPopupMenu!.GetMeta("workerId").AsString());
+				Client.SendRevokeWorkerAuth(OfflineWorkerPopupMenu.GetMeta("workerId").AsString());
 
 				break;
 
@@ -136,11 +158,12 @@ public partial class Root : Node {
 
 	}
 
-	public virtual void OnWorkerLoginCancelled() => Client.SendCancelWorkerAuth();
+	public virtual void OnWorkerLoginCancelled() =>
+		Client.SendCancelWorkerAuth();
 
 	public virtual void OnServerLogsButtonToggled(bool pressed) {
 
-		LogsList!.Visible = pressed;
+		LogsList.Visible = pressed;
 
 	}
 
@@ -176,12 +199,16 @@ public partial class Root : Node {
 		Client.DisconnectClient();
 
 	}
+	#endregion
 
+	#region Node Events
 	public override void _Ready() {
 
 		UpdateConnectionStatus(ConnectionStatus.Disconnected);
 
-		Client.NetworkError += message => PromptBarrier!.ShowPrompt<ErrorMessagePrompt>().SetMessage(message);
+		Client.NetworkError +=
+			PromptBarrier.ShowPrompt<ErrorMessagePrompt>()
+							.SetMessage;
 
 		Client.ConnectionStatusChanged += connectionStatus => {
 
@@ -199,7 +226,7 @@ public partial class Root : Node {
 
 					else {
 
-						PromptBarrier!.ShowPrompt<LoginPrompt>();
+						PromptBarrier.ShowPrompt<LoginPrompt>();
 
 					}
 
@@ -210,19 +237,19 @@ public partial class Root : Node {
 				case ConnectionStatus.Connecting:
 				case ConnectionStatus.Disconnected: {
 
-					LogsList!.Clear();
-					Workers!.Clear();
-					Buildings!.Clear();
+					LogsList.Clear();
+					Workers.Clear();
+					Buildings.Clear();
 
 					UpdateWorkerLists();
 
-					foreach(Node node in BuildingsTabContainer!.GetChildren()) {
+					foreach(Node node in BuildingTabs.ToList()) {
 
 						node.QueueFree();
 
 					}
 
-					PromptBarrier!.HidePrompt();
+					PromptBarrier.HidePrompt();
 
 					break;
 
@@ -234,7 +261,7 @@ public partial class Root : Node {
 
 		Client.AuthResponseReceived += authResponse => {
 
-			LoadingBarrier!.HideBarrier();
+			LoadingBarrier.HideBarrier();
 
 			if(authResponse.Success == true) {
 
@@ -244,297 +271,272 @@ public partial class Root : Node {
 
 			}
 
-			PromptBarrier!.ShowPrompt<LoginPrompt>().SetFailed();
+			PromptBarrier.ShowPrompt<LoginPrompt>().SetFailed();
 
 		};
 
-		Client.Listen(Client.IncomingMessage.Log, data => {
+		Client.Listen(Client.IncomingMessage.Log,
+						data => {
 
-			string message = data.ReadString();
+							string message = data.ReadString();
 
-			Color color = new();
+							Color color =
+								data.ReadByte() switch {
 
-			switch(data.ReadByte()) {
+									0 => Colors.White,
+									1 => Colors.Green,
+									2 => Colors.Red,
+									_ => new()
 
-				case 0: {
+								};
 
-					color = Colors.White;
+							LogsList.SetItemCustomFgColor(LogsList.AddItem(message), color);
 
-					break;
+							VScrollBar scrollBar = LogsList.GetVScrollBar();
 
-				}
+							scrollBar.Value = scrollBar.MaxValue;
 
-				case 1: {
+						});
 
-					color = Colors.Green;
+		Client.Listen(Client.IncomingMessage.Worker,
+						data => {
 
-					break;
+							string workerId = data.ReadString();
+							string workerName = data.ReadString();
 
-				}
+							Workers.Add(new(workerId, workerName, false));
 
-				case 2: {
+							UpdateWorkerLists();
 
-					color = Colors.Red;
+						});
 
-					break;
+		Client.Listen(Client.IncomingMessage.WorkerStatus,
+						data => {
 
-				}
+							string workerId = data.ReadString();
+							bool isOnline = data.ReadBoolean();
 
-			}
+							int index =
+								Workers.FindIndex(worker =>
+														worker.Id.Equals(workerId));
 
-			LogsList!.SetItemCustomFgColor(LogsList.AddItem(message), color);
+							if(index == -1) {
 
-			VScrollBar scrollBar = LogsList.GetVScrollBar();
+								GD.PushError("Failed to update Worker Status: Worker is not in the Workers list.");
 
-			scrollBar.Value = scrollBar.MaxValue;
+								return;
 
-		});
+							}
 
-		Client.Listen(Client.IncomingMessage.Worker, data => {
+							Workers[index] =
+								Workers[index] with {
 
-			string workerId = data.ReadString();
-			string workerName = data.ReadString();
+									IsOnline = isOnline
 
-			Workers.Add(new(workerId, workerName, false));
+								};
 
-			UpdateWorkerLists();
+							UpdateWorkerLists();
 
-		});
-
-		Client.Listen(Client.IncomingMessage.WorkerStatus, data => {
-
-			string workerId = data.ReadString();
-			bool isOnline = data.ReadBoolean();
-
-			int index = Workers.FindIndex(worker => worker.Id.Equals(workerId));
-
-			if(index == -1) {
-
-				GD.PushError("Failed to update Worker Status: Worker is not in the Workers list.");
-
-				return;
-
-			}
-
-			Workers[index] = Workers[index] with { IsOnline = isOnline };
-
-			UpdateWorkerLists();
-
-		});
+						});
 
 		Client.Listen(Client.IncomingMessage.WorkerLoginCode,
-						data => PromptBarrier!.GetPrompt<WorkerLoginPrompt>()
-																.SetLoginCode(data.ReadString()));
+						data =>
+									PromptBarrier.GetPrompt<WorkerLoginPrompt>()
+													.SetLoginCode(data.ReadString()));
 
 		Client.Listen(Client.IncomingMessage.WorkerAuthSuccess,
-						data => PromptBarrier!.HidePrompt());
+						data =>
+									PromptBarrier.HidePrompt());
 
-		Client.Listen(Client.IncomingMessage.Building, data => {
+		Client.Listen(Client.IncomingMessage.Building,
+						data => {
 
-			string buildingId = data.ReadString();
-			string buildingName = data.ReadString();
-			int buildingWidth = data.ReadInt32();
-			int buildingLength = data.ReadInt32();
-			int buildingHeight = data.ReadInt32();
+							string buildingId = data.ReadString();
+							string buildingName = data.ReadString();
+							int buildingWidth = data.ReadInt32();
+							int buildingLength = data.ReadInt32();
+							int buildingHeight = data.ReadInt32();
 
-			Building building = new(buildingId,
+							Building building =
+								new(buildingId,
 											buildingName,
 											new(buildingWidth,
 															buildingHeight,
 															buildingLength));
 
-			Building? existingBuilding =
-				Buildings.SingleOrDefault(building => building.Id == buildingId);
+							Building? existingBuilding =
+								Buildings.SingleOrDefault(building =>
+																	building.Id == buildingId);
 
-			if(existingBuilding != null) {
+							if(existingBuilding != null) {
 
-				BuildingTab.BuildingTab existingBuildingTab =
-					BuildingsTabContainer!.GetChildren()
-											.Cast<BuildingTab.BuildingTab>()
-											.Single(buildingTab =>
-														buildingTab.Building == existingBuilding);
+								BuildingTab.BuildingTab existingBuildingTab =
+									BuildingTabs.Single(buildingTab =>
+																	buildingTab.Building == existingBuilding);
 
-				existingBuildingTab.Name = Guid.NewGuid().ToString();
+								existingBuildingTab.Name = Guid.NewGuid().ToString();
 
-				existingBuildingTab.QueueFree();
+								existingBuildingTab.QueueFree();
 
-				Buildings.Remove(existingBuilding);
+								Buildings.Remove(existingBuilding);
 
-			}
+							}
 
-			Buildings.Add(building);
+							Buildings.Add(building);
 
-			BuildingTab.BuildingTab buildingTab = BuildingTab!.Instantiate<BuildingTab.BuildingTab>();
+							BuildingTab.BuildingTab buildingTab =
+								BuildingTabScene.Instantiate<BuildingTab.BuildingTab>();
 
-			buildingTab.Name = building.Name;
-			buildingTab.Building = building;
+							buildingTab.Name = building.Name;
+							buildingTab.Building = building;
 
-			BuildingsTabContainer!.AddChild(buildingTab);
+							BuildingTabsContainer.AddChild(buildingTab);
 
-			BuildingsTabContainer.SetTabMetadata(BuildingsTabContainer.GetTabIdxFromControl(buildingTab),
-													building.Id);
+							BuildingTabsContainer.SetTabMetadata(BuildingTabsContainer.GetTabIdxFromControl(buildingTab),
+																	building.Id);
 
-		});
+						});
 
-		Client.Listen(Client.IncomingMessage.Rack, data => {
+		Client.Listen(Client.IncomingMessage.Rack,
+						data => {
 
-			string rackId = data.ReadString();
-			string buildingId = data.ReadString();
-			int rackX = data.ReadInt32();
-			int rackZ = data.ReadInt32();
-			int rackWidth = data.ReadInt32();
-			int rackLength = data.ReadInt32();
-			int rackShelves = data.ReadInt32();
-			float rackSpacing = data.ReadSingle();
-			float rackRotation = data.ReadSingle();
+							string rackId = data.ReadString();
+							string buildingId = data.ReadString();
+							int rackX = data.ReadInt32();
+							int rackZ = data.ReadInt32();
+							int rackWidth = data.ReadInt32();
+							int rackLength = data.ReadInt32();
+							int rackShelves = data.ReadInt32();
+							float rackSpacing = data.ReadSingle();
+							float rackRotation = data.ReadSingle();
 
-			BuildingTab.BuildingTab? buildingTab =
-				BuildingsTabContainer!.GetChildren()
-										.Cast<BuildingTab.BuildingTab>()
-										.FirstOrDefault(buildingTab =>
-															buildingTab.Building!.Id.Equals(buildingId));
+							BuildingTab.BuildingTab? buildingTab =
+								FindBuildingTabById(buildingId);
 
-			if(buildingTab == null) {
+							if(buildingTab == null) {
 
-				GD.PushError("Failed to create/update Rack: Building Tab not found!");
+								GD.PushError("Failed to create/update Rack: Building Tab not found!");
 
-				return;
+								return;
 
-			}
+							}
 
-			buildingTab.UpdateRack(rackId,
-									new(rackX, rackZ),
-									new(rackWidth, rackLength),
-									rackShelves,
-									rackSpacing,
-									rackRotation);
+							buildingTab.UpdateRack(rackId,
+													new(rackX, rackZ),
+													new(rackWidth, rackLength),
+													rackShelves,
+													rackSpacing,
+													rackRotation);
 
-		});
+						});
 
-		Client.Listen(Client.IncomingMessage.NoRack, data => {
+		Client.Listen(Client.IncomingMessage.NoRack,
+						data => {
 
-			string rackId = data.ReadString();
-			string buildingId = data.ReadString();
+							string rackId = data.ReadString();
+							string buildingId = data.ReadString();
 
-			BuildingTab.BuildingTab? buildingTab =
-				BuildingsTabContainer!.GetChildren()
-										.Cast<BuildingTab.BuildingTab>()
-										.FirstOrDefault(buildingTab =>
-															buildingTab.Building!.Id.Equals(buildingId));
+							BuildingTab.BuildingTab? buildingTab =
+								FindBuildingTabById(buildingId);
 
-			if(buildingTab == null) {
+							if(buildingTab == null) {
 
-				GD.PushError("Failed to remove Rack: Building Tab not found!");
+								GD.PushError("Failed to remove Rack: Building Tab not found!");
 
-				return;
+								return;
 
-			}
+							}
 
-			buildingTab.RemoveRack(rackId);
+							buildingTab.RemoveRack(rackId);
 
-		});
+						});
 
-		Client.Listen(Client.IncomingMessage.Product, data => {
+		Client.Listen(Client.IncomingMessage.Product,
+						data => {
 
-			string productId = data.ReadString();
-			float productWidth = data.ReadSingle();
-			float productLength = data.ReadSingle();
-			float productHeight = data.ReadSingle();
-			string productManufacturer = data.ReadString();
-			string rackId = data.ReadString();
-			int rackShelf = data.ReadInt32();
-			int rackSpot = data.ReadInt32();
-			string buildingId = data.ReadString();
-			string productName = data.ReadString();
-			string productCategory = data.ReadString();
+							string productId = data.ReadString();
+							float productWidth = data.ReadSingle();
+							float productLength = data.ReadSingle();
+							float productHeight = data.ReadSingle();
+							string productManufacturer = data.ReadString();
+							string rackId = data.ReadString();
+							int rackShelf = data.ReadInt32();
+							int rackSpot = data.ReadInt32();
+							string buildingId = data.ReadString();
+							string productName = data.ReadString();
+							string productCategory = data.ReadString();
 
-			BuildingTab.BuildingTab? buildingTab =
-				BuildingsTabContainer!.GetChildren()
-										.Cast<BuildingTab.BuildingTab>()
-										.FirstOrDefault(buildingTab =>
-															buildingTab.Building!.Id.Equals(buildingId));
+							BuildingTab.BuildingTab? buildingTab =
+								FindBuildingTabById(buildingId);
 
-			if(buildingTab == null) {
+							if(buildingTab == null) {
 
-				GD.PushError("Failed to create/update Product: Building Tab not found!");
+								GD.PushError("Failed to create/update Product: Building Tab not found!");
 
-				return;
+								return;
 
-			}
+							}
 
-			buildingTab.UpdateProduct(productId,
-										new(productWidth, productHeight, productLength),
-										productManufacturer,
-										rackId,
-										new(rackShelf, rackSpot),
-										productName,
-										productCategory);
+							buildingTab.UpdateProduct(productId,
+														new(productWidth, productHeight, productLength),
+														productManufacturer,
+														rackId,
+														new(rackShelf, rackSpot),
+														productName,
+														productCategory);
 
-		});
+						});
 
 		Client.StartClient();
 
 	}
+	#endregion
 
 	public virtual void UpdateConnectionStatus(ConnectionStatus connectionStatus) {
 
-		ConnectionStatusLabel!.Text = $"Connection status: {connectionStatus}";
+		ConnectionStatusLabel.Text = $"Connection status: {connectionStatus}";
 
-		Color fontColor = new();
+		(Color FontColor, string ButtonText) =
+			connectionStatus switch {
 
-		switch(connectionStatus) {
+				ConnectionStatus.Connected => (Colors.Green, "Disconnect?"),
+				ConnectionStatus.Disconnected => (Colors.Red, "Connect?"),
+				ConnectionStatus.Connecting => (Colors.Yellow, "Cancel?"),
+				_ => (new(), "")
 
-			case ConnectionStatus.Connected: {
+			};
 
-				fontColor = Colors.Green;
+		ConnectionStatusLabel.AddThemeColorOverride("font_color", FontColor);
 
-				ConnectionActionButton!.Text = "Disconnect?";
-
-				break;
-
-			}
-
-			case ConnectionStatus.Disconnected: {
-
-				fontColor = Colors.Red;
-
-				ConnectionActionButton!.Text = "Connect?";
-
-				break;
-
-			}
-
-			case ConnectionStatus.Connecting: {
-
-				fontColor = Colors.Yellow;
-
-				ConnectionActionButton!.Text = "Cancel?";
-
-				break;
-
-			}
-
-		}
-
-		ConnectionStatusLabel.AddThemeColorOverride("font_color", fontColor);
+		ConnectionActionButton.Text = ButtonText;
 
 	}
 
 	public virtual void UpdateWorkerLists() {
 
-		OnlineWorkersList!.Clear();
-		OfflineWorkersList!.Clear();
+		OnlineWorkersList.Clear();
+		OfflineWorkersList.Clear();
 
 		foreach(Worker worker in Workers) {
 
-			ItemList itemList = worker.IsOnline ? OnlineWorkersList : OfflineWorkersList;
+			ItemList itemList =
+				worker.IsOnline ?
+					OnlineWorkersList :
+					OfflineWorkersList;
 
-			itemList.SetItemMetadata(itemList.AddItem(worker.Name), worker.Id);
+			itemList.SetItemMetadata(itemList.AddItem(worker.Name),
+										worker.Id);
 		}
 
-		WorkerStats!.Text = $"Workers: {Workers.Count}, Online: {Workers.Count(worker => worker.IsOnline)}";
+		WorkerStats.Text = $"Workers: {Workers.Count}, Online: {Workers.Count(worker => worker.IsOnline)}";
 
 	}
+
+	public virtual BuildingTab.BuildingTab? FindBuildingTabById(string buildingId) =>
+		BuildingTabs.FirstOrDefault(buildingTab =>
+												buildingTab.Building
+															.Id
+															.Equals(buildingId));
 
 	protected override void Dispose(bool disposing) {
 

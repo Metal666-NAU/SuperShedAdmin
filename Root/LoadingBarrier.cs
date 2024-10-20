@@ -4,12 +4,15 @@ namespace SuperShedAdmin.Root;
 
 public partial class LoadingBarrier : Panel {
 
+#nullable disable
 	[Export]
-	public virtual Label? LoadingMessage { get; set; }
+	public virtual Label LoadingMessage { get; set; }
+#nullable enable
 
 	public virtual void ShowBarrier(string? message = null) {
 
-		LoadingMessage!.Text = message ?? LoadingMessage!.Text;
+		LoadingMessage.Text =
+			message ?? LoadingMessage.Text;
 
 		Show();
 
@@ -19,7 +22,7 @@ public partial class LoadingBarrier : Panel {
 
 		Hide();
 
-		LoadingMessage!.Text = null;
+		LoadingMessage.Text = null;
 
 	}
 

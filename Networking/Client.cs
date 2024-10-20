@@ -1,5 +1,7 @@
 ﻿using Godot;
 
+using Metal666.GodotUtilities.Extensions;
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,7 +15,9 @@ namespace SuperShedAdmin.Networking;
 
 public static class Client {
 
-	public static readonly JsonSerializerOptions JSON_SERIALIZER_OPTIONS = new() {
+	public const string ServerAddressEnvVariable = "SUPERSHED_SERVER_ADDRESS";
+
+	public static readonly JsonSerializerOptions JsonSerializerOptions = new() {
 
 		PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
 
@@ -23,8 +27,8 @@ public static class Client {
 
 	public static DisconnectionInfo? DisconnectionInfo { get; set; }
 
-	public static Dictionary<IncomingMessage, Action<BinaryReader>> Listeners { get; set; }
-		= new();
+	public static Dictionary<IncomingMessage, Action<BinaryReader>> Listeners { get; set; } =
+		[];
 
 	public static ConnectionStatus ConnectionStatus { get; set; }
 
@@ -38,13 +42,23 @@ public static class Client {
 
 		if(WebsocketClient != null) {
 
-			PublishNetworkError("Failed to start Client: Client is already running");
+			PublishNetworkError("Failed to start Client: Client is already running!");
 
 			return;
 
 		}
 
-		WebsocketClient = new(new Uri("ws://localhost:8181/admin")) {
+		string? serverAddress = System.Environment.GetEnvironmentVariable(ServerAddressEnvVariable);
+
+		if(serverAddress == null) {
+
+			PublishNetworkError($"Failed to start Client: server address not specified! Please set the {ServerAddressEnvVariable} environment variable.");
+
+			return;
+
+		}
+
+		WebsocketClient = new(new Uri($"ws://{serverAddress}/admin")) {
 
 			ReconnectTimeout = TimeSpan.FromMinutes(2),
 			ErrorReconnectTimeout = TimeSpan.FromSeconds(10),
@@ -83,7 +97,9 @@ public static class Client {
 
 				case WebSocketMessageType.Text: {
 
-					AuthResponse? authResponse = JsonSerializer.Deserialize<AuthResponse>(responseMessage.Text, JSON_SERIALIZER_OPTIONS);
+					AuthResponse? authResponse =
+						JsonSerializer.Deserialize<AuthResponse>(responseMessage.Text!,
+																	JsonSerializerOptions);
 
 					if(authResponse == null) {
 
@@ -93,7 +109,7 @@ public static class Client {
 
 					}
 
-					RunOnMainThread(() => AuthResponseReceived?.Invoke(authResponse));
+					AuthResponseReceived?.InvokeOnMainThread(authResponse);
 
 					break;
 
@@ -101,13 +117,12 @@ public static class Client {
 
 				case WebSocketMessageType.Binary: {
 
-					using MemoryStream memoryStream = new(responseMessage.Binary);
-
-					using BinaryReader binaryReader = new(memoryStream);
+					MemoryStream memoryStream = new(responseMessage.Binary!);
+					BinaryReader binaryReader = new(memoryStream);
 
 					IncomingMessage command = (IncomingMessage) binaryReader.ReadByte();
 
-					if(!Listeners.ContainsKey(command)) {
+					if(!Listeners.TryGetValue(command, out Action<BinaryReader>? value)) {
 
 						GD.PushWarning($"No listener found for command {command}, skipping...");
 
@@ -115,7 +130,13 @@ public static class Client {
 
 					}
 
-					RunOnMainThread(() => Listeners[command].Invoke(binaryReader));
+					Threading.InvokeOnMainThread(() => {
+
+						value(binaryReader);
+
+						binaryReader.Dispose();
+
+					});
 
 					break;
 
@@ -129,7 +150,8 @@ public static class Client {
 
 	}
 
-	public static void Listen(IncomingMessage incomingMessage, Action<BinaryReader> listener) => Listeners[incomingMessage] = listener;
+	public static void Listen(IncomingMessage incomingMessage, Action<BinaryReader> listener) =>
+		Listeners[incomingMessage] = listener;
 
 	public static void StopListening(IncomingMessage incomingMessage) =>
 		Listeners.Remove(incomingMessage);
@@ -150,16 +172,18 @@ public static class Client {
 		});
 
 	private static void Authenticate(AuthRequest authRequest) =>
-		WebsocketClient!.Send(JsonSerializer.Serialize(authRequest, JSON_SERIALIZER_OPTIONS));
+		WebsocketClient!.Send(JsonSerializer.Serialize(authRequest, JsonSerializerOptions));
 
 	public static void SendStartWorkerAuth(string workerId) =>
-		Send((byte) OutgoingMessage.StartWorkerAuth, workerId);
+		Send((byte) OutgoingMessage.StartWorkerAuth,
+				workerId);
 
 	public static void SendCancelWorkerAuth() =>
 		Send((byte) OutgoingMessage.CancelWorkerAuth);
 
 	public static void SendRevokeWorkerAuth(string workerId) =>
-		Send((byte) OutgoingMessage.RevokeWorkerAuth, workerId);
+		Send((byte) OutgoingMessage.RevokeWorkerAuth,
+				workerId);
 	public static void SendUpdateBuilding(string buildingId,
 											string buildingName,
 											int buildingWidth,
@@ -184,12 +208,12 @@ public static class Client {
 				rackId, rackX, rackZ, rackWidth, rackLength, rackShelves, rackSpacing, rackRotation);
 
 	public static void SendDeleteRack(string rackId) =>
-		Send((byte) OutgoingMessage.DeleteRack, rackId);
+		Send((byte) OutgoingMessage.DeleteRack,
+				rackId);
 
 	private static void Send(byte command, params object[] data) {
 
 		using MemoryStream memoryStream = new();
-
 		using BinaryWriter binaryWriter = new(memoryStream);
 
 		binaryWriter.Write(command);
@@ -208,21 +232,18 @@ public static class Client {
 
 		ConnectionStatus = connectionStatus;
 
-		RunOnMainThread(() => ConnectionStatusChanged?.Invoke(ConnectionStatus));
+		ConnectionStatusChanged?.InvokeOnMainThread(ConnectionStatus);
 
 	}
 
 	private static void PublishNetworkError(string message) =>
-		RunOnMainThread(() => NetworkError?.Invoke(message));
-
-	private static void RunOnMainThread(Action action) =>
-		Dispatcher.SynchronizationContext.Send(_ => action(), null);
+		NetworkError?.InvokeOnMainThread(message);
 
 	public static void DisconnectClient() {
 
-		WebsocketClient!.Stop(WebSocketCloseStatus.NormalClosure, null);
+		WebsocketClient!.Stop(WebSocketCloseStatus.NormalClosure, "");
 
-		WebsocketClient!.Dispose();
+		WebsocketClient.Dispose();
 
 		WebsocketClient = null;
 

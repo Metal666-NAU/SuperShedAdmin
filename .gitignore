@@ -3,3 +3,5 @@
 
 # My ignores
 .vs/
+.vshistory/
+*.csproj.old
